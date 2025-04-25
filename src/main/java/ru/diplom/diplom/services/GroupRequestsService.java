@@ -32,6 +32,7 @@ public class GroupRequestsService {
                 .collect(Collectors.toList());
     }
 
+    //какиш
 
     private GroupRequestsDTO convertToGroupRequestsDTO(GroupRequests groupRequest) {
         Optional<User> userOptional = userRepository.findById(groupRequest.getUser());
