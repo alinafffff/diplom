@@ -1,0 +1,303 @@
+package ru.diplom.diplom.services;
+
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.multipart.MultipartFile;
+import ru.diplom.diplom.dto.NewsCuratorDTO;
+import ru.diplom.diplom.dto.NewsDTO;
+import ru.diplom.diplom.dto.UserAdminDTO;
+import ru.diplom.diplom.models.*;
+import ru.diplom.diplom.repositories.*;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class NewsService {
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final GroupRepository groupRepository;
+    private final ProfileRepository profileRepository;
+    private final DirectionRepository directionRepository;
+    private final FormRepository formRepository;
+    private final LevelRepository levelRepository;
+    private final NewsRepository newsRepository;
+
+    public List<NewsDTO> getAllExceptCurators() {
+        return newsRepository.findAll().stream()
+                .filter(news -> {
+                    return userRepository.findById(news.getAuthor())
+                            .flatMap(user -> roleRepository.findById(user.getRole()))
+                            .map(role -> !role.getName().equalsIgnoreCase("Куратор"))
+                            .orElse(true);
+                })
+                .map(this::convertToNewsDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<NewsDTO> getNewsByRoleName(String roleName) {
+        return newsRepository.findAll().stream()
+                .filter(news -> {
+                    return userRepository.findById(news.getAuthor())
+                            .flatMap(user -> roleRepository.findById(user.getRole()))
+                            .map(role -> role.getName().equalsIgnoreCase(roleName))
+                            .orElse(false);
+                })
+                .map(this::convertToNewsDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<NewsCuratorDTO> getNewsByCuratorId(Integer curatorId) {
+        List<News> newsList = newsRepository.findAllByAuthor(curatorId);
+        return newsList.stream()
+                .map(this::convertToNewsCuratorDTO)
+                .toList();
+    }
+
+    public NewsDTO createNews(NewsDTO newsDTO) {
+        News news = new News();
+        news.setTitle(newsDTO.getTitle());
+        news.setContent(newsDTO.getDescription());
+        news.setPhotoUrl(newsDTO.getPhotoUrl());
+        news.setCreatedAt(LocalDateTime.now());
+        news.setAuthor(7); //костыльб
+
+        News savedNews = newsRepository.save(news);
+
+        return convertToNewsDTO(savedNews);
+    }
+
+    public String saveImage(MultipartFile imageFile) {
+        if (imageFile == null || imageFile.isEmpty()) {
+            throw new IllegalArgumentException("Файл не может быть пустым");
+        }
+
+        try {
+            String uploadDir = "uploads/images/";
+            String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir, fileName);
+            Files.createDirectories(filePath.getParent());
+            Files.write(filePath, imageFile.getBytes());
+
+            return "/uploads/images/" + fileName;
+        } catch (IOException e) {
+            throw new RuntimeException("Ошибка при сохранении изображения", e);
+        }
+    }
+
+    public News createNewsAsCurator(NewsCuratorDTO dto) {
+        News news = News.builder()
+                .title(dto.getTitle())
+                .content(dto.getDescription())
+                .photoUrl(dto.getPhotoUrl())
+                .createdAt(LocalDateTime.now())
+                .myGroup(dto.getGroupId())
+                .author(8) // заглушка для куратора
+                .isStudentCouncilRequest(false)
+                .isRejected(false)
+                .build();
+
+        return newsRepository.save(news);
+    }
+
+    public News updateNews(Integer id, News updatedNews) {
+        return newsRepository.findById(id)
+                .map(existingNews -> {
+                    if (updatedNews.getTitle() != null) existingNews.setTitle(updatedNews.getTitle());
+                    if (updatedNews.getContent() != null) existingNews.setContent(updatedNews.getContent());
+                    existingNews.setPhotoUrl(updatedNews.getPhotoUrl());
+                    if (updatedNews.getMyGroup() != null) existingNews.setMyGroup(updatedNews.getMyGroup());
+
+                    return newsRepository.save(existingNews);
+                })
+                .orElseThrow(() -> new EntityNotFoundException("Новость с id " + id + " не найдена"));
+    }
+
+
+//    @Transactional
+//    public NewsCuratorDTO createNewsAsCurator(NewsCuratorDTO dto, Integer curatorId) {
+//        Group group = groupRepository.findById(dto.getGroupId())
+//                .orElseThrow(() -> new RuntimeException("Группа не найдена"));
+//
+//        if (!group.getCurator().equals(curatorId)) {
+//            throw new RuntimeException("Вы не куратор этой группы");
+//        }
+//
+//        News news = new News();
+//        news.setTitle(dto.getTitle());
+//        news.setContent(dto.getDescription());
+//        news.setPhotoUrl(dto.getPhotoUrl());
+//        news.setCreatedAt(LocalDateTime.now());
+//        news.setAuthor(curatorId);
+//        news.setMyGroup(dto.getGroupId());
+//
+//        News saved = newsRepository.save(news);
+//
+//        return convertToNewsCuratorDTO(saved);
+//    }
+
+
+
+//    public NewsCuratorDTO createNewsCurator(NewsCuratorDTO newsDTO, Integer groupId) {
+//        int curatorId = 8; //костыльб
+//
+//        Group group = groupRepository.findById(groupId)
+//                .orElseThrow(() -> new IllegalArgumentException("Группа не найдена"));
+//
+//        if (!group.getCurator().equals(curatorId)) {
+//            throw new SecurityException("Вы не являетесь куратором этой группы");
+//        }
+//
+//        News news = new News();
+//        news.setTitle(newsDTO.getTitle());
+//        news.setContent(newsDTO.getDescription());
+//        news.setPhotoUrl(newsDTO.getPhotoUrl());
+//        news.setCreatedAt(LocalDateTime.now());
+//        news.setMyGroup(groupId);
+//        news.setAuthor(curatorId);
+//
+//        News savedNews = newsRepository.save(news);
+//
+//        return convertToNewsCuratorDTO(savedNews);
+//    }
+
+    @Transactional
+    public List<?> searchNews(String query, String filter) {
+        Role role = roleRepository.findByName(filter);
+        List<?> n;
+
+        if ("Все новости".equals(filter)) {
+
+            n = newsRepository.findByContentContainingIgnoreCase(query)
+                    .stream()
+                    .filter(news -> {
+                        User author = userRepository.findById(news.getAuthor()).orElse(null);
+                        return author != null && !author.getRole().equals(roleRepository.findByName("Куратор").getId());
+                    })
+                    .map(news -> convertToNewsDTO(news))
+                    .collect(Collectors.toList());
+        }
+        else if ("Мои новости".equals(filter)) {
+
+            n = newsRepository.findByContentContainingIgnoreCase(query)
+                    .stream()
+                    .filter(news -> news.getAuthor().equals(8))  // костыльб
+                    .map(news -> convertToNewsCuratorDTO(news))
+                    .collect(Collectors.toList());
+        } else {
+            n = newsRepository.findByContentContainingIgnoreCase(query)
+                    .stream()
+                    .filter(news -> {
+                        User author = userRepository.findById(news.getAuthor()).orElse(null);
+                        if (author != null) {
+                            return author.getRole().equals(role.getId());
+                        }
+                        return false;
+                    })
+                    .map(news -> convertToNewsDTO(news))
+                    .collect(Collectors.toList());
+        }
+
+        return n;
+    }
+
+    public void deleteNewById(@PathVariable Integer newsId){
+        newsRepository.deleteById(newsId);
+    }
+
+
+    private NewsDTO convertToNewsDTO(News news){
+
+        String authorRoleName = userRepository.findById(news.getAuthor())
+                .flatMap(user -> roleRepository.findById(user.getRole()))
+                .map(Role::getName)
+                .orElse("Неизвестная роль");
+
+        return NewsDTO.builder()
+                .id(news.getId())
+                .createdAt(news.getCreatedAt() != null ? news.getCreatedAt() : LocalDateTime.now())
+                .author(news.getAuthor())
+                .authorRole(authorRoleName)
+                .title(news.getTitle())
+                .description(news.getContent())
+                .photoUrl(news.getPhotoUrl())
+                .build();
+    }
+
+    private NewsCuratorDTO convertToNewsCuratorDTO(News news){
+
+        String groupFormatted;
+        if (news.getMyGroup() != null) {
+            groupFormatted = groupRepository.findById(news.getMyGroup())
+                    .map(g -> {
+
+                        String level = levelRepository.findById(g.getMyLevel())
+                                .map(Level::getAbbreviation).orElse("ass");
+
+                        String profile = g.getProfile() != null
+                                ? profileRepository.findById(g.getProfile())
+                                .map(Profile::getNumber)
+                                .map(String::valueOf)
+                                .orElse("")
+                                : "";
+
+                        String direction = g.getProfile() != null
+                                ? profileRepository.findById(g.getProfile())
+                                .flatMap(p -> directionRepository.findById(p.getDirection()))
+                                .map(Direction::getAbbreviation)
+                                .orElse("ЭЭЭИ")
+                                : directionRepository.findById(g.getDirection())
+                                .map(Direction::getAbbreviation)
+                                .orElse("ЭЭЭИ2");
+
+                        String form = formRepository.findById(g.getForm())
+                                .map(Form::getAbbreviation).orElse("");
+
+                        int course = calculateCourse(g.getStartDate());
+
+                        return String.format("%s%s-%s%s-%d%s",
+                                level,
+                                profile.isEmpty() ? "" : profile,
+                                direction,
+                                form.isEmpty() ? "" : form,
+                                course,
+                                g.getNumber());
+                    })
+                    .orElse("Группа не найдена");
+        } else groupFormatted = null;
+
+        return NewsCuratorDTO.builder()
+                .id(news.getId())
+                .createdAt(news.getCreatedAt() != null ? news.getCreatedAt() : LocalDateTime.now())
+                .author(news.getAuthor())
+                .title(news.getTitle())
+                .description(news.getContent())
+                .photoUrl(news.getPhotoUrl())
+                .groupId(news.getMyGroup())
+                .group(groupFormatted)
+                .build();
+    }
+
+    private int calculateCourse(LocalDate startDate) {
+        if (startDate == null) return 0;
+
+        LocalDate now = LocalDate.now();
+        int course = now.getYear() - startDate.getYear();
+        if (now.getMonthValue() < 9) {
+            course -= 1;
+        }
+        return Math.max(course + 1, 1);
+    }
+}
