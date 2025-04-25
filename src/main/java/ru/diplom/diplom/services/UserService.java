@@ -140,7 +140,7 @@ public class UserService {
         }
     }
 
-    private UserGroupDTO convertToUserDTO(User user) {
+    public UserGroupDTO convertToUserDTO(User user) {
         String fullName = user.getSurname() + " " + user.getName() + " " +
                 (user.getPatronymic() != null ? user.getPatronymic() : "");
 

@@ -3,6 +3,7 @@ package ru.diplom.diplom.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import ru.diplom.diplom.dto.UserGroupDTO;
 import ru.diplom.diplom.models.*;
 import ru.diplom.diplom.dto.GroupRequestsDTO;
@@ -22,8 +23,12 @@ public class GroupRequestsService {
     private final UserRepository userRepository;
 
     private final GroupRepository groupRepository;
+
     @Autowired
-    GroupService groupService;
+    private GroupService groupService;
+    @Autowired
+    private UserService userService;
+
 
     public List<GroupRequestsDTO> getGroupRequestsByGroupId(Integer groupId) {
         List<GroupRequests> users = groupRequestsRepository.findByGroup(groupId);
@@ -32,7 +37,24 @@ public class GroupRequestsService {
                 .collect(Collectors.toList());
     }
 
-    //какиш
+    public void deleteGroupRequestById(@PathVariable Integer requestId){
+        groupRequestsRepository.deleteById(requestId);
+    }
+
+    public UserGroupDTO approveRequest(Integer requestId) {
+        GroupRequests request = groupRequestsRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Заявка не найдена"));
+
+        User user = userRepository.findById(request.getUser())
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        user.setGroup(request.getGroup());
+        userRepository.save(user);
+
+        groupRequestsRepository.deleteById(requestId);
+
+        return userService.convertToUserDTO(user);
+    }
 
     private GroupRequestsDTO convertToGroupRequestsDTO(GroupRequests groupRequest) {
         Optional<User> userOptional = userRepository.findById(groupRequest.getUser());
