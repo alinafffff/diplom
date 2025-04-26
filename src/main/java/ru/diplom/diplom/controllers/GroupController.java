@@ -71,4 +71,18 @@ public class GroupController {
     }
 
 
+    @PostMapping("/addCurator/{groupId}/{curatorId}")
+    public ResponseEntity<String> addCuratorToGroup(@PathVariable Integer groupId, @PathVariable Integer curatorId) {
+        String result = groupService.addCuratorToGroup(groupId, curatorId);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/checkCurator/{groupId}/{curatorId}")
+    public ResponseEntity<String> checkCuratorForGroup(@PathVariable Integer groupId, @PathVariable Integer curatorId) {
+        String result = groupService.checkCuratorForGroup(groupId, curatorId);
+        return ResponseEntity.ok(result);
+    }
+
+
+
 }

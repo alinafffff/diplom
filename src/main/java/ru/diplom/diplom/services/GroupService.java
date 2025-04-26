@@ -104,6 +104,59 @@ public class GroupService {
         groupRepository.save(g);
     }
 
+    public String addCuratorToGroup(Integer groupId, Integer curatorId) {
+        Group group = groupRepository.findById(groupId).orElse(null);
+
+        if (group == null) {
+            return "Группа не найдена.";
+        }
+
+        // Ситуация 1: У группы уже есть куратор, но он не я
+        if (group.getCurator() != null && !group.getCurator().equals(curatorId)) {
+            group.setCurator(curatorId);
+            groupRepository.save(group);
+            return "Группа была успешно передана новому куратору.";
+        }
+
+        // Ситуация 2: У группы уже есть куратор — это я, не добавляем
+        if (group.getCurator() != null && group.getCurator().equals(curatorId)) {
+            return "У этой группы уже есть ваш куратор. Добавление не требуется.";
+        }
+
+        // Ситуация 3: У группы нет куратора
+        if (group.getCurator() == null) {
+            group.setCurator(curatorId);
+            groupRepository.save(group);
+            return "Группа была успешно добавлена вашему куратору.";
+        }
+
+        return "Неизвестная ошибка.";
+    }
+
+    // В GroupService
+    public String checkCuratorForGroup(Integer groupId, Integer curatorId) {
+        Group group = groupRepository.findById(groupId).orElse(null);
+
+        if (group == null) {
+            return "Группа не найдена.";
+        }
+
+        if (group.getCurator() != null && !group.getCurator().equals(curatorId)) {
+            return "У группы уже есть другой куратор.";
+        }
+
+        if (group.getCurator() != null && group.getCurator().equals(curatorId)) {
+            return "У этой группы уже есть ваш куратор.";
+        }
+
+        if (group.getCurator() == null) {
+            return "Группа свободна.";
+        }
+
+        return "Неизвестная ошибка.";
+    }
+
+
     public Optional<Group> getGroupById(Integer groupId) {
         return groupRepository.findById(groupId);
     }
