@@ -121,6 +121,15 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public List<UserGroupDTO> searchUsersByFullName(String query, Integer groupId) {
+        return userRepository.searchByFullName(query, groupId)
+                .stream()
+                .map(this::convertToUserDTO)
+                .collect(Collectors.toList());
+    }
+
+
     public List<UserGroupDTO> getUsersByGroupId(Integer groupId) {
         List<User> users = userRepository.findByGroup(groupId);
         return users.stream()

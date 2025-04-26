@@ -87,5 +87,14 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/searchStudents")
+    public ResponseEntity<List<UserGroupDTO>> searchUsers(
+            @RequestParam("query") String query,
+            @RequestParam("groupId") Integer groupId
+    ) {
+        List<UserGroupDTO> users = userService.searchUsersByFullName(query, groupId);
+        return ResponseEntity.ok(users);
+    }
+
 
 }

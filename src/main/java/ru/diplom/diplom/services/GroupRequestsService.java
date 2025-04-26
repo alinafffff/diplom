@@ -1,5 +1,6 @@
 package ru.diplom.diplom.services;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,15 @@ public class GroupRequestsService {
     public void deleteGroupRequestById(@PathVariable Integer requestId){
         groupRequestsRepository.deleteById(requestId);
     }
+
+    @Transactional
+    public List<GroupRequestsDTO> searchRequestsByFullName(String query, Integer groupId) {
+        return groupRequestsRepository.searchByFullName(query, groupId)
+                .stream()
+                .map(this::convertToGroupRequestsDTO)
+                .collect(Collectors.toList());
+    }
+
 
     public UserGroupDTO approveRequest(Integer requestId) {
         GroupRequests request = groupRequestsRepository.findById(requestId)

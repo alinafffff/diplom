@@ -37,4 +37,13 @@ public class GroupRequestsController {
         return ResponseEntity.ok(userGroupDTO);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<GroupRequestsDTO>> searchGroupRequests(
+            @RequestParam("query") String query,
+            @RequestParam("groupId") Integer groupId
+    ) {
+        List<GroupRequestsDTO> requests = groupRequestsService.searchRequestsByFullName(query, groupId);
+        return ResponseEntity.ok(requests);
+    }
+
 }
