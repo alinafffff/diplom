@@ -27,6 +27,8 @@ public class GroupService {
     private FormRepository formRepository;
     @Autowired
     private LevelRepository levelRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     public void createGroup(GroupCreateDTO dto) {
         Group group = new Group();
@@ -156,6 +158,17 @@ public class GroupService {
         return "Неизвестная ошибка.";
     }
 
+    public void updateGroupInfo(Integer groupId, Group g) {
+        Group group = groupRepository.findById(groupId).orElse(null);
+        if (group == null) {
+            throw new RuntimeException("Группа не найдена");
+        }
+        group.setLeader(g.getLeader());
+        group.setOrganizer(g.getOrganizer());
+        group.setDescription(g.getDescription());
+        groupRepository.save(group);
+    }
+
 
     public Optional<Group> getGroupById(Integer groupId) {
         return groupRepository.findById(groupId);
@@ -167,11 +180,46 @@ public class GroupService {
                 .toList();
     }
 
-    public List<GroupAllDTO> getGroupDTOsByCuratorId(Integer curatorId) {
-        return groupRepository.findByCurator(curatorId)
+    public List<GroupUpdateDTO> getGroupUpdateByCuratorId(Integer id) {
+        return groupRepository.findByCurator(id)
                 .stream()
-                .map(this::convertToGroupAllDTO)
-                .collect(Collectors.toList());
+                .map(this::toGroupUpdateDTO)
+                .toList();
+    }
+
+    public GroupUpdateDTO getGroupUpdateByGroupId(Integer groupId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Группа не найдена"));
+
+        return toGroupUpdateDTO(group);
+    }
+
+
+    public GroupUpdateDTO toGroupUpdateDTO(Group group) {
+        User leader = null;
+        User organizer = null;
+
+        if (group.getLeader() != null) {
+            leader = userRepository.findById(group.getLeader()).orElse(null);
+        }
+        if (group.getOrganizer() != null) {
+            organizer = userRepository.findById(group.getOrganizer()).orElse(null);
+        }
+
+        String leaderName = (leader != null)
+                ? leader.getSurname() + " " + leader.getName() + " " + leader.getPatronymic()
+                : null;
+
+        String organizerName = (organizer != null)
+                ? organizer.getSurname() + " " + organizer.getName() + " " + organizer.getPatronymic()
+                : null;
+
+        return GroupUpdateDTO.builder()
+                .id(group.getId())
+                .leaderFullName(leaderName)
+                .organizerFullName(organizerName)
+                .description(group.getDescription())
+                .build();
     }
 
     private GroupCreateDTO convertToDTO(Group g) {

@@ -83,6 +83,24 @@ public class GroupController {
         return ResponseEntity.ok(result);
     }
 
+    @PutMapping("/updateInfo/{groupId}")
+    public ResponseEntity<String> updateGroupInfo(@PathVariable Integer groupId, @RequestBody Group g) {
+        try {
+            groupService.updateGroupInfo(groupId, g);
+            return ResponseEntity.ok("Информация о группе успешно обновлена.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
+    @GetMapping("/getInfoByGroup/{groupId}")
+    public ResponseEntity<GroupUpdateDTO> getGroupInfoByGroupId(@PathVariable Integer groupId) {
+        try {
+            GroupUpdateDTO group = groupService.getGroupUpdateByGroupId(groupId);
+            return ResponseEntity.ok(group);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
 }
