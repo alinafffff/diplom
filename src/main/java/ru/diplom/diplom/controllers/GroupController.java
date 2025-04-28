@@ -62,15 +62,6 @@ public class GroupController {
     }
 
 
-    @PutMapping("/updateGroup/{groupId}")
-    public ResponseEntity<String> updateGroup(
-            @PathVariable Integer groupId,
-            @RequestBody Group request) { // Принимаем JSON
-        groupService.updateActiveGroup(groupId, request);
-        return ResponseEntity.ok("Группа успешно обновлена");
-    }
-
-
     @PostMapping("/addCurator/{groupId}/{curatorId}")
     public ResponseEntity<String> addCuratorToGroup(@PathVariable Integer groupId, @PathVariable Integer curatorId) {
         String result = groupService.addCuratorToGroup(groupId, curatorId);
@@ -83,15 +74,15 @@ public class GroupController {
         return ResponseEntity.ok(result);
     }
 
-    @PutMapping("/updateInfo/{groupId}")
-    public ResponseEntity<String> updateGroupInfo(@PathVariable Integer groupId, @RequestBody Group g) {
-        try {
-            groupService.updateGroupInfo(groupId, g);
-            return ResponseEntity.ok("Информация о группе успешно обновлена.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//    @PutMapping("/updateInfo/{groupId}")
+//    public ResponseEntity<String> updateGroupInfo(@PathVariable Integer groupId, @RequestBody Group g) {
+//        try {
+//            groupService.updateGroupInfo(groupId, g);
+//            return ResponseEntity.ok("Информация о группе успешно обновлена.");
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
 
     @GetMapping("/getInfoByGroup/{groupId}")
     public ResponseEntity<GroupUpdateDTO> getGroupInfoByGroupId(@PathVariable Integer groupId) {
@@ -101,6 +92,11 @@ public class GroupController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+    @PutMapping("/updateInfo/{groupId}")
+    public ResponseEntity<String> updateLeaders(@PathVariable Integer groupId, @RequestParam(name = "starosta",required = false) Integer starosta, @RequestParam(name = "proforg",required = false) Integer proforg){
+        groupService.updateGroupInfo(groupId, starosta, proforg);
+        return ResponseEntity.ok("Группа успешно обновлена");
     }
 
 }

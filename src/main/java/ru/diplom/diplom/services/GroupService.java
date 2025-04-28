@@ -158,14 +158,16 @@ public class GroupService {
         return "Неизвестная ошибка.";
     }
 
-    public void updateGroupInfo(Integer groupId, Group g) {
+    public void updateGroupInfo(Integer groupId, Integer starosta, Integer proforg) {
         Group group = groupRepository.findById(groupId).orElse(null);
         if (group == null) {
             throw new RuntimeException("Группа не найдена");
         }
-        group.setLeader(g.getLeader());
-        group.setOrganizer(g.getOrganizer());
-        group.setDescription(g.getDescription());
+        String d = group.getDescription();
+
+        group.setLeader(starosta);
+        group.setOrganizer(proforg);
+        group.setDescription(d);
         groupRepository.save(group);
     }
 
