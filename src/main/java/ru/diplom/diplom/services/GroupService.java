@@ -158,20 +158,27 @@ public class GroupService {
         return "Неизвестная ошибка.";
     }
 
-    public void updateGroupInfo(Integer groupId, Integer starosta, Integer proforg) {
-        Group group = groupRepository.findById(groupId).orElse(null);
-        if (group == null) {
-            throw new RuntimeException("Группа не найдена");
+    public void updateGroupInfo(Integer groupId, Integer starosta, Integer proforg, String newDescription) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Группа не найдена"));
+
+        System.out.println("Before update - Description: " + group.getDescription()); // Лог
+
+        if (starosta != null) {
+            group.setLeader(starosta);
         }
-        String d = group.getDescription();
+        if (proforg != null) {
+            group.setOrganizer(proforg);
+        }
+        if (newDescription != null && !newDescription.isEmpty()) {
+            group.setDescription(newDescription);
+        }
 
-        group.setLeader(starosta);
-        group.setOrganizer(proforg);
-        group.setDescription(d);
-        groupRepository.save(group);
+        System.out.println("After update - Description: " + group.getDescription()); // Лог
+
+        Group saved = groupRepository.save(group);
+        System.out.println("Saved entity - Description: " + saved.getDescription()); // Лог
     }
-
-
     public Optional<Group> getGroupById(Integer groupId) {
         return groupRepository.findById(groupId);
     }

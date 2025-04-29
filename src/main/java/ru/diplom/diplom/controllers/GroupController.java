@@ -11,6 +11,7 @@ import ru.diplom.diplom.services.GroupService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
@@ -94,8 +95,13 @@ public class GroupController {
         }
     }
     @PutMapping("/updateInfo/{groupId}")
-    public ResponseEntity<String> updateLeaders(@PathVariable Integer groupId, @RequestParam(name = "starosta",required = false) Integer starosta, @RequestParam(name = "proforg",required = false) Integer proforg){
-        groupService.updateGroupInfo(groupId, starosta, proforg);
+    public ResponseEntity<String> updateLeaders(
+            @PathVariable Integer groupId,
+            @RequestParam(name = "starosta", required = false) Integer starosta,
+            @RequestParam(name = "proforg", required = false) Integer proforg,
+            @RequestParam(name = "description", required = false) String description) {
+
+        groupService.updateGroupInfo(groupId, starosta, proforg, description);
         return ResponseEntity.ok("Группа успешно обновлена");
     }
 
