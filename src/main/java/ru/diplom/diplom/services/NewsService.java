@@ -125,54 +125,6 @@ public class NewsService {
                 .orElseThrow(() -> new EntityNotFoundException("Новость с id " + id + " не найдена"));
     }
 
-
-//    @Transactional
-//    public NewsCuratorDTO createNewsAsCurator(NewsCuratorDTO dto, Integer curatorId) {
-//        Group group = groupRepository.findById(dto.getGroupId())
-//                .orElseThrow(() -> new RuntimeException("Группа не найдена"));
-//
-//        if (!group.getCurator().equals(curatorId)) {
-//            throw new RuntimeException("Вы не куратор этой группы");
-//        }
-//
-//        News news = new News();
-//        news.setTitle(dto.getTitle());
-//        news.setContent(dto.getDescription());
-//        news.setPhotoUrl(dto.getPhotoUrl());
-//        news.setCreatedAt(LocalDateTime.now());
-//        news.setAuthor(curatorId);
-//        news.setMyGroup(dto.getGroupId());
-//
-//        News saved = newsRepository.save(news);
-//
-//        return convertToNewsCuratorDTO(saved);
-//    }
-
-
-
-//    public NewsCuratorDTO createNewsCurator(NewsCuratorDTO newsDTO, Integer groupId) {
-//        int curatorId = 8; //костыльб
-//
-//        Group group = groupRepository.findById(groupId)
-//                .orElseThrow(() -> new IllegalArgumentException("Группа не найдена"));
-//
-//        if (!group.getCurator().equals(curatorId)) {
-//            throw new SecurityException("Вы не являетесь куратором этой группы");
-//        }
-//
-//        News news = new News();
-//        news.setTitle(newsDTO.getTitle());
-//        news.setContent(newsDTO.getDescription());
-//        news.setPhotoUrl(newsDTO.getPhotoUrl());
-//        news.setCreatedAt(LocalDateTime.now());
-//        news.setMyGroup(groupId);
-//        news.setAuthor(curatorId);
-//
-//        News savedNews = newsRepository.save(news);
-//
-//        return convertToNewsCuratorDTO(savedNews);
-//    }
-
     @Transactional
     public List<?> searchNews(String query, String filter) {
         Role role = roleRepository.findByName(filter);
