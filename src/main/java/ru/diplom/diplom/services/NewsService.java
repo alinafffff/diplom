@@ -34,6 +34,7 @@ public class NewsService {
     private final FormRepository formRepository;
     private final LevelRepository levelRepository;
     private final NewsRepository newsRepository;
+    private final NotificationsService notificationsService;
 
     public List<NewsDTO> getAllExceptCurators() {
         return newsRepository.findAll().stream()
@@ -75,6 +76,8 @@ public class NewsService {
         news.setAuthor(7); //костыльб
 
         News savedNews = newsRepository.save(news);
+
+        notificationsService.createNewsNotification(news.getContent());
 
         return convertToNewsDTO(savedNews);
     }

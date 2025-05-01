@@ -2,7 +2,10 @@ package ru.diplom.diplom.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
+import java.sql.SQLType;
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,8 +21,9 @@ public class Notifications {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
-    @Column(name = "type", nullable = false)
-    private String type;//enum?
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(columnDefinition = "notification_type", nullable = false)
+    private NotificationType type;
 
     @Column(name = "text", nullable = false)
     private String text;

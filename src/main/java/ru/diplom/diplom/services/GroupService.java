@@ -29,6 +29,8 @@ public class GroupService {
     private LevelRepository levelRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private NotificationsService notificationsService;
 
     public void createGroup(GroupCreateDTO dto) {
         Group group = new Group();
@@ -107,7 +109,11 @@ public class GroupService {
     }
 
     public String addCuratorToGroup(Integer groupId, Integer curatorId) {
+        String groupName;
         Group group = groupRepository.findById(groupId).orElse(null);
+
+        Optional<Group> groupOptional = groupRepository.findById(groupId);
+        groupName = this.convertToGroupDTO(groupOptional.get()).getName();
 
         if (group == null) {
             return "Группа не найдена.";
@@ -117,6 +123,7 @@ public class GroupService {
         if (group.getCurator() != null && !group.getCurator().equals(curatorId)) {
             group.setCurator(curatorId);
             groupRepository.save(group);
+            notificationsService.createCuratorChangeNotification(groupName);
             return "Группа была успешно передана новому куратору.";
         }
 
@@ -129,6 +136,7 @@ public class GroupService {
         if (group.getCurator() == null) {
             group.setCurator(curatorId);
             groupRepository.save(group);
+            notificationsService.createCuratorChangeNotification(groupName);
             return "Группа была успешно добавлена вашему куратору.";
         }
 
