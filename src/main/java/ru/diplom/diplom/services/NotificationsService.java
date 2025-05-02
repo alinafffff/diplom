@@ -34,7 +34,7 @@ public class NotificationsService {
         createNotification(NotificationType.система, "В группе " + groupName + " новый куратор");
     }
 
-    public List<Notifications> getAllNotificationsCurator(){
+    public List<Notifications> getAllNotificationsCurator(){ //неверно, у всех будет одинаково, попроси Сашу помочь. может расширить енам! скорее всего
         return notificationRepository.findAllByOrderByCreatedAtDesc();
     }
 

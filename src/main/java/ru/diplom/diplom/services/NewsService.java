@@ -67,17 +67,33 @@ public class NewsService {
                 .toList();
     }
 
-    public NewsDTO createNews(NewsDTO newsDTO) {
+    public List<NewsDTO> getNewsByDekanatId(Integer dId) {
+        List<News> newsList = newsRepository.findAllByAuthor(dId);
+        return newsList.stream()
+                .map(this::convertToNewsDTO)
+                .toList();
+    }
+
+    public NewsDTO createNews(Integer userId, NewsDTO newsDTO) {
         News news = new News();
+        News savedNews = null;
+
         news.setTitle(newsDTO.getTitle());
         news.setContent(newsDTO.getDescription());
         news.setPhotoUrl(newsDTO.getPhotoUrl());
         news.setCreatedAt(LocalDateTime.now());
-        news.setAuthor(7); //костыльб
+        news.setAuthor(userId);
 
-        News savedNews = newsRepository.save(news);
+        Optional<User> u = userRepository.findById(userId);
+        if(u.get().getRole().equals(5)) {
+            news.setIsStudentCouncilRequest(true);
+        }
 
-        notificationsService.createNewsNotification(news.getContent());
+        if(!u.get().getRole().equals(5)){
+            savedNews = newsRepository.save(news);
+            notificationsService.createNewsNotification(news.getContent());
+        }
+        else throw new RuntimeException("Новость от студсовета сначала надо одобрить, только потом создавать!");
 
         return convertToNewsDTO(savedNews);
     }
@@ -100,14 +116,14 @@ public class NewsService {
         }
     }
 
-    public News createNewsAsCurator(NewsCuratorDTO dto) {
+    public News createNewsAsCurator(Integer userId, NewsCuratorDTO dto) {
         News news = News.builder()
                 .title(dto.getTitle())
                 .content(dto.getDescription())
                 .photoUrl(dto.getPhotoUrl())
                 .createdAt(LocalDateTime.now())
                 .myGroup(dto.getGroupId())
-                .author(8) // заглушка для куратора
+                .author(userId)
                 .isStudentCouncilRequest(false)
                 .isRejected(false)
                 .build();
@@ -129,7 +145,7 @@ public class NewsService {
     }
 
     @Transactional
-    public List<?> searchNews(String query, String filter) {
+    public List<?> searchNews(String query, Integer myId, String filter) {
         Role role = roleRepository.findByName(filter);
         List<?> n;
 
@@ -148,8 +164,48 @@ public class NewsService {
 
             n = newsRepository.findByContentContainingIgnoreCase(query)
                     .stream()
-                    .filter(news -> news.getAuthor().equals(8))  // костыльб
+                    .filter(news -> news.getAuthor().equals(myId))
                     .map(news -> convertToNewsCuratorDTO(news))
+                    .collect(Collectors.toList());
+        } else {
+            n = newsRepository.findByContentContainingIgnoreCase(query)
+                    .stream()
+                    .filter(news -> {
+                        User author = userRepository.findById(news.getAuthor()).orElse(null);
+                        if (author != null) {
+                            return author.getRole().equals(role.getId());
+                        }
+                        return false;
+                    })
+                    .map(news -> convertToNewsDTO(news))
+                    .collect(Collectors.toList());
+        }
+
+        return n;
+    }
+
+    @Transactional
+    public List<?> searchDekanatNews(String query, Integer myId, String filter) {
+        Role role = roleRepository.findByName(filter);
+        List<?> n;
+
+        if ("Все новости".equals(filter)) {
+
+            n = newsRepository.findByContentContainingIgnoreCase(query)
+                    .stream()
+                    .filter(news -> {
+                        User author = userRepository.findById(news.getAuthor()).orElse(null);
+                        return author != null && !author.getRole().equals(roleRepository.findByName("Куратор").getId());
+                    })
+                    .map(news -> convertToNewsDTO(news))
+                    .collect(Collectors.toList());
+        }
+        else if ("Мои новости".equals(filter)) {
+
+            n = newsRepository.findByContentContainingIgnoreCase(query)
+                    .stream()
+                    .filter(news -> news.getAuthor().equals(myId))
+                    .map(news -> convertToNewsDTO(news))
                     .collect(Collectors.toList());
         } else {
             n = newsRepository.findByContentContainingIgnoreCase(query)

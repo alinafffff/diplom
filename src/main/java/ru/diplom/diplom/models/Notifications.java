@@ -36,8 +36,8 @@ public class Notifications {
 
     @Column(name = "reciever_id")
     private Integer receiver;
+
+    @Column(name = "is_read", nullable = false, columnDefinition = "boolean default false")
+    private boolean isRead = false;
 }
 
-//public enum NotificationType {
-//    СИСТЕМА, НОВОСТЬ;
-//}
