@@ -21,10 +21,18 @@ public class NotificationsController {
         return notificationsService.getAllNotificationsCurator();
     }
 
-    @GetMapping("/searchCurator")
-    public ResponseEntity<List<Notifications>> searchForCurator(@RequestParam String query) {
-        List<Notifications> n = notificationsService.searchCuratorNotifications(query);
-        return ResponseEntity.ok(n);
+    @GetMapping("/forDekanat")
+    public List<Notifications> getDekanatNotifications() {
+        return notificationsService.getAllNotificationsDekanat();
     }
 
+    @GetMapping("/curator/search")
+    public List<Notifications> searchCuratorNotifications(@RequestParam String query) {
+        return notificationsService.searchCuratorNotifications(query);
+    }
+
+    @GetMapping("/dekanat/search")
+    public List<Notifications> searchDekanatNotifications(@RequestParam String query) {
+        return notificationsService.searchDekanatNotifications(query);
+    }
 }

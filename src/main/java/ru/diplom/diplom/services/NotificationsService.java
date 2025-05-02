@@ -33,16 +33,45 @@ public class NotificationsService {
     public void createCuratorChangeNotification(String groupName) {
         createNotification(NotificationType.система, "В группе " + groupName + " новый куратор");
     }
+    public void createGroupRequestsNotification(String groupName) {
+        createNotification(NotificationType.запрос, "Новый запрос на вступление в группу " + groupName);
+    }
 
-    public List<Notifications> getAllNotificationsCurator(){ //неверно, у всех будет одинаково, попроси Сашу помочь. может расширить енам! скорее всего
-        return notificationRepository.findAllByOrderByCreatedAtDesc();
+    public void createStudsovetRequestsNotification(String title) {
+        createNotification(NotificationType.студсовет, "Новый запрос на публикацию от студсовета: " + title);
+    }
+    public void createResultsNotification() {
+        createNotification(NotificationType.результаты, "Новый запрос на подтверждение результатов!");
+    }
+
+    public List<Notifications> getAllNotificationsCurator() {
+        return notificationRepository.findByTypeInOrderByCreatedAtDesc(
+                List.of(NotificationType.новость, NotificationType.система, NotificationType.запрос)
+        );
+    }
+
+    public List<Notifications> getAllNotificationsDekanat() {
+        return notificationRepository.findByTypeInOrderByCreatedAtDesc(
+                List.of(NotificationType.новость, NotificationType.система, NotificationType.студсовет, NotificationType.результаты)
+        );
     }
 
     @Transactional
     public List<Notifications> searchCuratorNotifications(String query) {
-        List<Notifications> n;
-        n = notificationRepository.findByTextContainingIgnoreCase(query);
-        return n;
+        return notificationRepository.findByTypeInAndTextContainingIgnoreCase(
+                List.of(NotificationType.новость, NotificationType.система, NotificationType.запрос),
+                query
+        );
     }
+
+    @Transactional
+    public List<Notifications> searchDekanatNotifications(String query) {
+        return notificationRepository.findByTypeInAndTextContainingIgnoreCase(
+                List.of(NotificationType.новость, NotificationType.система,
+                        NotificationType.студсовет, NotificationType.результаты),
+                query
+        );
+    }
+
 
 }

@@ -2,9 +2,15 @@ package ru.diplom.diplom.models;
 
 public enum NotificationType {
     система("система"),
-    новость("новость");
+    новость("новость"),
+    запрос("запрос"),
+    студсовет("студсовет"),
+    результаты("результаты");
 
     private final String name;
+
+    //куратор: система, новость, запрос
+    //деканат: система, новость, студсовет, результаты
 
     NotificationType(String name) {
         this.name = name;
