@@ -32,14 +32,19 @@ public class NewsController {
         return newsService.getNewsByRoleName(roleName);
     }
 
-    @GetMapping("/curator")
-    public List<NewsCuratorDTO> getCuratorNews() {
-        return newsService.getNewsByCuratorId(8);//костыльб
+    @GetMapping("/curator/{curatorId}")
+    public List<NewsCuratorDTO> getCuratorNews(@PathVariable Integer curatorId) {
+        return newsService.getNewsByCuratorId(curatorId);
     }
 
-    @PostMapping("/create")
-    public NewsDTO createNews(@RequestBody NewsDTO newsDTO) {
-        return newsService.createNews(newsDTO);
+    @GetMapping("/dekanat/{dId}")
+    public List<NewsDTO> getDekanatNews(@PathVariable Integer dId) {
+        return newsService.getNewsByDekanatId(dId);
+    }
+
+    @PostMapping("/create/{userId}")
+    public NewsDTO createNews(@PathVariable Integer userId, @RequestBody NewsDTO newsDTO) {
+        return newsService.createNews(userId, newsDTO);
     }
 
     // Загружаем картинку, получаем путь
@@ -49,16 +54,21 @@ public class NewsController {
         return ResponseEntity.ok(imagePath);
     }
 
-    // Создаём новость с указанными параметрами и URL картинки
-    @PostMapping("/createNewsAsCurator")
-    public ResponseEntity<News> createNewsFromCurator(@RequestBody NewsCuratorDTO dto) {
-        News createdNews = newsService.createNewsAsCurator(dto);
+    @PostMapping("/createNewsAsCurator/{myId}")
+    public ResponseEntity<News> createNewsFromCurator(@PathVariable Integer myId, @RequestBody NewsCuratorDTO dto) {
+        News createdNews = newsService.createNewsAsCurator(myId, dto);
         return ResponseEntity.ok(createdNews);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<?>> searchNews(@RequestParam String query, @RequestParam String roleName) {
-        List<?> n = newsService.searchNews(query, roleName);
+    @GetMapping("/search/{myId}")
+    public ResponseEntity<List<?>> searchNews(@PathVariable Integer myId, @RequestParam String query, @RequestParam String roleName) {
+        List<?> n = newsService.searchNews(query, myId, roleName);
+        return ResponseEntity.ok(n);
+    }
+
+    @GetMapping("/searchDekanatNews/{myId}")
+    public ResponseEntity<List<?>> searchDekanatNews(@PathVariable Integer myId, @RequestParam String query, @RequestParam String roleName) {
+        List<?> n = newsService.searchDekanatNews(query, myId, roleName);
         return ResponseEntity.ok(n);
     }
 

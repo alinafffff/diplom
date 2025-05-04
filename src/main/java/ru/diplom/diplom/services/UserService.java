@@ -6,10 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import ru.diplom.diplom.dto.GroupDTO;
-import ru.diplom.diplom.dto.UserAdminDTO;
-import ru.diplom.diplom.dto.UserGroupDTO;
-import ru.diplom.diplom.dto.UserUpdateCreateDTO;
+import ru.diplom.diplom.dto.*;
 import ru.diplom.diplom.models.*;
 import ru.diplom.diplom.models.Role;
 import ru.diplom.diplom.repositories.DirectionRepository;
@@ -137,6 +134,37 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public UserMyInfoDTO getUserMyInfoDTOByUserId(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("не найден"));
+        return convertToUserMyInfoDTO(user);
+    }
+
+    @Transactional
+    public UserMyInfoDTO updateUserInfo(Integer userId, UserMyInfoDTO userDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        if (userDto.getEmail() != null) {
+            user.setEmail(userDto.getEmail());
+        }
+        if (userDto.getSurname() != null) {
+            user.setSurname(userDto.getSurname());
+        }
+        if (userDto.getName() != null) {
+            user.setName(userDto.getName());
+        }
+        if (userDto.getPatronymic() != null) {
+            user.setPatronymic(userDto.getPatronymic());
+        }
+        if (userDto.getPhotoUrl() != null) {
+            user.setPhotoUrl(userDto.getPhotoUrl());
+        }
+
+        User updatedUser = userRepository.save(user);
+        return convertToUserMyInfoDTO(updatedUser);
+    }
+
     @Transactional
     public void removeStudentFromGroup(Integer userId) {
         Optional<User> userOpt = userRepository.findById(userId);
@@ -169,6 +197,10 @@ public class UserService {
                 .groupName(groupName)
                 .groupId(groupId)
                 .build();
+    }
+
+    private UserMyInfoDTO convertToUserMyInfoDTO(User user) {
+        return new UserMyInfoDTO(user.getId(), user.getEmail(), user.getSurname(), user.getName(), user.getPatronymic(),user.getPhotoUrl());
     }
 
 

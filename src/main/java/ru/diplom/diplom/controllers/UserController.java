@@ -3,9 +3,7 @@ package ru.diplom.diplom.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.diplom.diplom.dto.UserAdminDTO;
-import ru.diplom.diplom.dto.UserGroupDTO;
-import ru.diplom.diplom.dto.UserUpdateCreateDTO;
+import ru.diplom.diplom.dto.*;
 import ru.diplom.diplom.models.User;
 import ru.diplom.diplom.services.ProfileService;
 import ru.diplom.diplom.services.UserService;
@@ -95,6 +93,25 @@ public class UserController {
     ) {
         List<UserGroupDTO> users = userService.searchUsersByFullName(query, groupId);
         return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/getInfoByUserId/{userId}")
+    public ResponseEntity<UserMyInfoDTO> getInfoByUserId(@PathVariable Integer userId) {
+        try {
+            UserMyInfoDTO u = userService.getUserMyInfoDTOByUserId(userId);
+            return ResponseEntity.ok(u);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/updateInfoByUserId/{userId}")
+    public ResponseEntity<UserMyInfoDTO> updateUserInfo(
+            @PathVariable Integer userId,
+            @RequestBody UserMyInfoDTO userDto) {
+
+        UserMyInfoDTO updatedUser = userService.updateUserInfo(userId, userDto);
+        return ResponseEntity.ok(updatedUser);
     }
 
 

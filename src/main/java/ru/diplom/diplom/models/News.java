@@ -39,7 +39,7 @@ public class News {
     @Column(name = "is_student_council_request", columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean isStudentCouncilRequest = false;
 
-    @Column(name = "is_rejected", columnDefinition = "BOOLEAN DEFAULT false")
-    private Boolean isRejected = false;
+    @Column(name = "is_rejected")
+    private Boolean isRejected;
 
 }
