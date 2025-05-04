@@ -32,7 +32,7 @@ public class Event {
     private LocalDateTime endDate;
 
     @Column(name = "type")
-    private String type;//enum?
+    private Type type;
 
     @Column(name = "created_by", nullable = false)
     private Integer createdBy;
@@ -66,8 +66,12 @@ public class Event {
 
     @Column(name = "is_rejected", columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean isRejected = false;
+
+    public enum Type {
+        ХАКАТОН,
+        ВОЛОНТЕРСТВО,
+        ХАКАТОН_ОТ_ПАРТНЕРА;
+    }
 }
 
-//public enum MyEventType {
-//    ХАКАТОН, ВОЛОНТЕРСТВО, ХАКАТОН_ОТ_ПАРТНЕРА;
-//}
+

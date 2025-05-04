@@ -18,6 +18,7 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
     @GetMapping("/all")
     public List<UserAdminDTO> getAllUsers() {
         return userService.getAllUsersAdmin();
