@@ -3,6 +3,7 @@ package ru.diplom.diplom.dto;
 import jakarta.persistence.Column;
 import lombok.*;
 import ru.diplom.diplom.models.Event;
+import ru.diplom.diplom.models.EventType;
 
 import java.time.LocalDateTime;
 
@@ -17,7 +18,7 @@ public class SaveEventDTO {
     private String description;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
-    private Event.Type type;
+    private EventType type;
     private Integer createdBy;
     private Integer points;
     private Integer points1st;
@@ -28,7 +29,7 @@ public class SaveEventDTO {
     private Integer maxParticipants;
     private Integer maxTeamSize;
     private Boolean isStudentCouncilRequest = false;
-    private Boolean isRejected = false;
+    private Boolean isRejected;
 
     public Event toEntity() {
         return Event.builder()

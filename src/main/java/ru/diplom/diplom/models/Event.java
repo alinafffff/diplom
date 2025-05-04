@@ -2,6 +2,8 @@ package ru.diplom.diplom.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -31,8 +33,9 @@ public class Event {
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
-    @Column(name = "type")
-    private Type type;
+    @Column(name = "type", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    private EventType type;
 
     @Column(name = "created_by", nullable = false)
     private Integer createdBy;
@@ -64,14 +67,8 @@ public class Event {
     @Column(name = "is_student_council_request", columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean isStudentCouncilRequest = false;
 
-    @Column(name = "is_rejected", columnDefinition = "BOOLEAN DEFAULT false")
-    private Boolean isRejected = false;
-
-    public enum Type {
-        ХАКАТОН,
-        ВОЛОНТЕРСТВО,
-        ХАКАТОН_ОТ_ПАРТНЕРА;
-    }
+    @Column(name = "is_rejected")
+    private Boolean isRejected;
 }
 
 
