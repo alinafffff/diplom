@@ -1,10 +1,10 @@
 package ru.diplom.diplom.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import ru.diplom.diplom.dto.SaveEventDTO;
+import ru.diplom.diplom.dto.EventHackathonDTO;
+import ru.diplom.diplom.dto.EventPartnersHackathonDTO;
+import ru.diplom.diplom.dto.EventVolunteeringDTO;
 import ru.diplom.diplom.models.Event;
 import ru.diplom.diplom.models.EventType;
 import ru.diplom.diplom.services.EventService;
@@ -28,9 +28,19 @@ public class EventController {
         return eventService.getOne(id);
     }
 
-    @PostMapping
-    public Event save(@RequestBody SaveEventDTO saveEventDto) {
-        return eventService.save(saveEventDto);
+    @PostMapping("/createVolunteering/{authorId}")
+    public EventVolunteeringDTO createVolunteering(@PathVariable Integer authorId, @RequestBody EventVolunteeringDTO event) {
+        return eventService.createVolunteeringEvent(authorId,event);
+    }
+
+    @PostMapping("/createHackathon/{authorId}")
+    public EventHackathonDTO createHackathon(@PathVariable Integer authorId, @RequestBody EventHackathonDTO event) {
+        return eventService.createHackathonEvent(authorId,event);
+    }
+
+    @PostMapping("/createPartnersHackathon/{authorId}")
+    public EventPartnersHackathonDTO createPartnersHackathon(@PathVariable Integer authorId, @RequestBody EventPartnersHackathonDTO event) {
+        return eventService.createPartnersHackathonEvent(authorId,event);
     }
 
     @DeleteMapping("/deleteById/{id}")
