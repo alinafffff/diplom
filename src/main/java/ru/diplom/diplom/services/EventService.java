@@ -18,6 +18,7 @@ import ru.diplom.diplom.repositories.RoleRepository;
 import ru.diplom.diplom.repositories.UserRepository;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,10 +34,6 @@ public class EventService {
 
     public List<Event> findByType(EventType type) {
         return eventRepository.findByType(type);
-    }
-
-    public Event save(SaveEventDTO saveEventDto) {
-        return eventRepository.save(saveEventDto.toEntity());
     }
 
     @Transactional
@@ -121,6 +118,12 @@ public class EventService {
         return convertToPartnersHackathonDTO(savedEvent);
     }
 
+    public List<?> getAllEventsWithTypeSpecificDTOs() {
+        return eventRepository.findAll().stream()
+                .map(this::convertToSpecificDTO)
+                .collect(Collectors.toList());
+    }
+
     public Event getOne(int id) {
         Optional<Event> eventOptional = eventRepository.findById(id);
         return eventOptional.orElseThrow(() ->
@@ -138,6 +141,14 @@ public class EventService {
 
 
 
+    private Object convertToSpecificDTO(Event event) {
+        return switch (event.getType()) {
+            case волонтерство -> convertToVolunteeringDTO(event);
+            case хакатон -> convertToHackathonDTO(event);
+            case хакатон_от_партнера ->  convertToPartnersHackathonDTO(event);
+            default -> throw new IllegalStateException("Unknown event type: " + event.getType());
+        };
+    }
 
 
     private EventVolunteeringDTO convertToVolunteeringDTO(Event e) {

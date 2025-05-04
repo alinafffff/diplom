@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class SaveEventDTO {
+    private Integer id;
 
     private String name;
     private String description;
@@ -33,6 +34,7 @@ public class SaveEventDTO {
 
     public Event toEntity() {
         return Event.builder()
+                .id(this.id)
                 .name(this.name)
                 .description(this.description)
                 .startDate(this.startDate)
