@@ -1,6 +1,7 @@
 package ru.diplom.diplom.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.diplom.diplom.dto.EventHackathonDTO;
 import ru.diplom.diplom.dto.EventPartnersHackathonDTO;
@@ -64,6 +65,12 @@ public class EventController {
     @GetMapping("/findById/{myId}")
     public List<?> getAllMyEvents(@PathVariable Integer myId) {
         return eventService.getAMyEvents(myId);
+    }
+
+    @GetMapping("/search/{myId}")
+    public ResponseEntity<List<?>> searchEvents(@PathVariable Integer myId, @RequestParam String query, @RequestParam String filter) {
+        List<?> n = eventService.searchEvents(query, myId, filter);
+        return ResponseEntity.ok(n);
     }
 
 

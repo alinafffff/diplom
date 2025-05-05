@@ -183,6 +183,51 @@ public class EventService {
                 .toList();
     }
 
+    @Transactional
+    public List<?> searchEvents(String query, Integer myId, String filter) {
+        LocalDateTime now = LocalDateTime.now();
+
+        return eventRepository.findByDescriptionContainingIgnoreCase(query).stream()
+                .filter(event -> {
+                    // Общие условия для всех фильтров
+                    Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
+                    Boolean isRejected = event.getIsRejected();
+                    LocalDateTime startDate = event.getStartDate();
+
+                    boolean dateCondition = startDate != null && startDate.isAfter(now);
+                    boolean statusCondition;
+                    boolean tmpCondition = Boolean.FALSE.equals(isStudentCouncilRequest)
+                            || (Boolean.TRUE.equals(isStudentCouncilRequest)
+                            && Boolean.FALSE.equals(isRejected));
+
+                    // Условия в зависимости от фильтра
+                    switch (filter) {
+                        case "Мои новости":
+                            statusCondition = event.getCreatedBy().equals(myId);
+                            break;
+                        case "Студсовет":
+                            statusCondition = Boolean.TRUE.equals(isStudentCouncilRequest)
+                                    && Boolean.FALSE.equals(isRejected);
+                            break;
+                        case "Волонтерство":
+                            statusCondition = "волонтерство".equalsIgnoreCase(event.getType().getName())
+                            && tmpCondition;
+                            break;
+                        case "Хакатоны":
+                            statusCondition = (("хакатон".equalsIgnoreCase(event.getType().getName())
+                                    || "хакатон_от_партнера".equalsIgnoreCase(event.getType().getName())))
+                                    && tmpCondition;
+                            break;
+                        default: // Все мероприятия
+                            statusCondition = tmpCondition;
+                    }
+
+                    return dateCondition && statusCondition;
+                })
+                .map(this::convertToSpecificDTO)
+                .collect(Collectors.toList());
+    }
+
     public Event getOne(int id) {
         Optional<Event> eventOptional = eventRepository.findById(id);
         return eventOptional.orElseThrow(() ->
