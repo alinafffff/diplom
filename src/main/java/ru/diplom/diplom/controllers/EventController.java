@@ -54,4 +54,9 @@ public class EventController {
         return eventService.getAllEventsWithTypeSpecificDTOs();
     }
 
+//    @GetMapping("/allVolunteeringEvents")
+//    public List<?> getAllVolunteeringEvents() {
+//        return eventService.getAllVolunteeringEvents();
+//    }
+
 }

@@ -39,22 +39,37 @@ public class NewsService {
     public List<NewsDTO> getAllExceptCurators() {
         return newsRepository.findAll().stream()
                 .filter(news -> {
-                    return userRepository.findById(news.getAuthor())
+                    // 1. Фильтрация по роли (исключаем кураторов)
+                    boolean isNotCurator = userRepository.findById(news.getAuthor())
                             .flatMap(user -> roleRepository.findById(user.getRole()))
                             .map(role -> !role.getName().equalsIgnoreCase("Куратор"))
                             .orElse(true);
+
+                    // 2. Фильтрация по статусу студсовета
+                    boolean isApprovedNews = Boolean.FALSE.equals(news.getIsStudentCouncilRequest()) ||
+                            (Boolean.TRUE.equals(news.getIsStudentCouncilRequest()) &&
+                                    Boolean.FALSE.equals(news.getIsRejected()));
+
+                    return isNotCurator && isApprovedNews;
                 })
                 .map(this::convertToNewsDTO)
                 .collect(Collectors.toList());
     }
-
     public List<NewsDTO> getNewsByRoleName(String roleName) {
         return newsRepository.findAll().stream()
                 .filter(news -> {
-                    return userRepository.findById(news.getAuthor())
+                    // 1. Фильтрация по роли автора
+                    boolean isMatchingRole = userRepository.findById(news.getAuthor())
                             .flatMap(user -> roleRepository.findById(user.getRole()))
                             .map(role -> role.getName().equalsIgnoreCase(roleName))
                             .orElse(false);
+
+                    // 2. Фильтрация по статусу студсовета
+                    boolean isApprovedNews = Boolean.FALSE.equals(news.getIsStudentCouncilRequest()) ||
+                            (Boolean.TRUE.equals(news.getIsStudentCouncilRequest()) &&
+                                    Boolean.FALSE.equals(news.getIsRejected()));
+
+                    return isMatchingRole && isApprovedNews;
                 })
                 .map(this::convertToNewsDTO)
                 .collect(Collectors.toList());

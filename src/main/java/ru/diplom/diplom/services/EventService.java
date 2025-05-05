@@ -118,11 +118,33 @@ public class EventService {
         return convertToPartnersHackathonDTO(savedEvent);
     }
 
+
     public List<?> getAllEventsWithTypeSpecificDTOs() {
         return eventRepository.findAll().stream()
+                .filter(event -> {
+                    Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
+                    Boolean isRejected = event.getIsRejected();
+
+                    return Boolean.FALSE.equals(isStudentCouncilRequest) ||
+                            (Boolean.TRUE.equals(isStudentCouncilRequest) && Boolean.FALSE.equals(isRejected));
+                })
                 .map(this::convertToSpecificDTO)
                 .collect(Collectors.toList());
     }
+        //неверно
+    public List<EventVolunteeringDTO> getAllVolunteeringEvents() {
+        return eventRepository.findAll().stream()
+                .filter(event -> {
+                    Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
+                    Boolean isRejected = event.getIsRejected();
+
+                    return Boolean.FALSE.equals(isStudentCouncilRequest) ||
+                            (Boolean.TRUE.equals(isStudentCouncilRequest) && Boolean.FALSE.equals(isRejected));
+                })
+                .map(this::convertToVolunteeringDTO)
+                .collect(Collectors.toList());
+    }
+
 
     public Event getOne(int id) {
         Optional<Event> eventOptional = eventRepository.findById(id);

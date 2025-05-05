@@ -23,4 +23,5 @@ public class EventVolunteeringDTO {
     private Integer maxParticipants;
     private Boolean isStudentCouncilRequest = false;
     private Boolean isRejected;
+
 }
