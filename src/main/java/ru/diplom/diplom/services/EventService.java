@@ -2,6 +2,8 @@ package ru.diplom.diplom.services;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.diplom.diplom.dto.*;
-import ru.diplom.diplom.models.Event;
-import ru.diplom.diplom.models.EventType;
-import ru.diplom.diplom.models.Role;
-import ru.diplom.diplom.models.User;
+import ru.diplom.diplom.models.*;
 import ru.diplom.diplom.repositories.EventRepository;
 import ru.diplom.diplom.repositories.RoleRepository;
 import ru.diplom.diplom.repositories.UserRepository;
@@ -120,31 +119,69 @@ public class EventService {
 
 
     public List<?> getAllEventsWithTypeSpecificDTOs() {
+        LocalDateTime now = LocalDateTime.now();
         return eventRepository.findAll().stream()
                 .filter(event -> {
                     Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
                     Boolean isRejected = event.getIsRejected();
+                    LocalDateTime startDate = event.getStartDate();
 
-                    return Boolean.FALSE.equals(isStudentCouncilRequest) ||
+                    boolean dateCondition = startDate != null && startDate.isAfter(now);
+                    boolean statusCondition = Boolean.FALSE.equals(isStudentCouncilRequest) ||
                             (Boolean.TRUE.equals(isStudentCouncilRequest) && Boolean.FALSE.equals(isRejected));
+
+                    return dateCondition && statusCondition;
                 })
                 .map(this::convertToSpecificDTO)
                 .collect(Collectors.toList());
     }
-        //неверно
-    public List<EventVolunteeringDTO> getAllVolunteeringEvents() {
+
+    public List<?> getFilteredEventsByTypes(List<String> eventTypes) {
+        LocalDateTime now = LocalDateTime.now();
+        return eventRepository.findAll().stream()
+                .filter(event -> {
+                    boolean correctType = eventTypes.stream()
+                            .anyMatch(type -> type.equalsIgnoreCase(event.getType().getName()));
+
+                    Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
+                    Boolean isRejected = event.getIsRejected();
+                    LocalDateTime startDate = event.getStartDate();
+
+                    boolean dateCondition = startDate != null && startDate.isAfter(now);
+                    boolean statusCondition = Boolean.FALSE.equals(isStudentCouncilRequest) ||
+                            (Boolean.TRUE.equals(isStudentCouncilRequest) &&
+                                    Boolean.FALSE.equals(isRejected));
+
+                    return correctType && dateCondition && statusCondition;
+                })
+                .map(this::convertToSpecificDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<?> getStudentCouncilRequestEvents() {
+        LocalDateTime now = LocalDateTime.now();
         return eventRepository.findAll().stream()
                 .filter(event -> {
                     Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
                     Boolean isRejected = event.getIsRejected();
+                    LocalDateTime startDate = event.getStartDate();
 
-                    return Boolean.FALSE.equals(isStudentCouncilRequest) ||
-                            (Boolean.TRUE.equals(isStudentCouncilRequest) && Boolean.FALSE.equals(isRejected));
+                    boolean dateCondition = startDate != null && startDate.isAfter(now);
+                    boolean statusCondition = Boolean.TRUE.equals(isStudentCouncilRequest)
+                            && Boolean.FALSE.equals(isRejected);
+
+                    return dateCondition && statusCondition;
                 })
-                .map(this::convertToVolunteeringDTO)
+                .map(this::convertToSpecificDTO)
                 .collect(Collectors.toList());
     }
 
+    public List<?> getAMyEvents(Integer myId) {
+        List<Event> eventsList = eventRepository.findAllByCreatedBy(myId);
+        return eventsList.stream()
+                .map(this::convertToSpecificDTO)
+                .toList();
+    }
 
     public Event getOne(int id) {
         Optional<Event> eventOptional = eventRepository.findById(id);

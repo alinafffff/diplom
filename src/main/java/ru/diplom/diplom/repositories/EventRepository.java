@@ -8,11 +8,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.diplom.diplom.models.Event;
 import ru.diplom.diplom.models.EventType;
+import ru.diplom.diplom.models.News;
 
 import java.util.List;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event,Integer> {
     List<Event> findByType(EventType type);
+    List<Event> findAllByCreatedBy(Integer id);
 
 }

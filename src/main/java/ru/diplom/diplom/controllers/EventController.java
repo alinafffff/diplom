@@ -10,7 +10,9 @@ import ru.diplom.diplom.models.Event;
 import ru.diplom.diplom.models.EventType;
 import ru.diplom.diplom.services.EventService;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -18,11 +20,6 @@ import java.util.List;
 public class EventController {
     @Autowired
     private EventService eventService;
-
-    @GetMapping("/findByCategory")
-    public List<Event> findAllByCategory(@RequestParam EventType type) {
-        return eventService.findByType(type);
-    }
 
     @GetMapping("/{id}")
     public Event getOne(@PathVariable int id) {
@@ -54,9 +51,20 @@ public class EventController {
         return eventService.getAllEventsWithTypeSpecificDTOs();
     }
 
-//    @GetMapping("/allVolunteeringEvents")
-//    public List<?> getAllVolunteeringEvents() {
-//        return eventService.getAllVolunteeringEvents();
-//    }
+    @GetMapping("/findByTypes")
+    public List<?> getEventsByTypes(@RequestParam List<String> types) {
+        return eventService.getFilteredEventsByTypes(types);
+    }
+
+    @GetMapping("/allStudsovetEvents")
+    public List<?> getAllStudsovetEvents() {
+        return eventService.getStudentCouncilRequestEvents();
+    }
+
+    @GetMapping("/findById/{myId}")
+    public List<?> getAllMyEvents(@PathVariable Integer myId) {
+        return eventService.getAMyEvents(myId);
+    }
+
 
 }
