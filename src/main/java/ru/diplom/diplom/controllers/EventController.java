@@ -42,6 +42,32 @@ public class EventController {
         return eventService.createPartnersHackathonEvent(authorId,event);
     }
 
+    @PutMapping("/updateVolunteering/{eventId}")
+    public ResponseEntity<EventVolunteeringDTO> updateVolunteering(
+            @PathVariable Integer eventId,
+            @RequestBody EventVolunteeringDTO dto) {
+        EventVolunteeringDTO updatedEvent = eventService.updateVolunteeringEvent(eventId, dto);
+        return ResponseEntity.ok(updatedEvent);
+    }
+
+    @PutMapping("/updateHackathon/{eventId}")
+    public ResponseEntity<EventHackathonDTO> updateHackathon(
+            @PathVariable Integer eventId,
+            @RequestBody EventHackathonDTO dto) {
+        EventHackathonDTO updatedEvent = eventService.updateHackathonEvent(eventId, dto);
+        return ResponseEntity.ok(updatedEvent);
+    }
+
+    @PutMapping("/updatePartnersHackathon/{eventId}")
+    public ResponseEntity<EventPartnersHackathonDTO> updatePartnersHackathon(
+            @PathVariable Integer eventId,
+            @RequestBody EventPartnersHackathonDTO dto) {
+        EventPartnersHackathonDTO updatedEvent = eventService.updatePartnersHackathonEvent(eventId, dto);
+        return ResponseEntity.ok(updatedEvent);
+    }
+
+
+
     @DeleteMapping("/deleteById/{id}")
     public Event delete(@PathVariable int id) {
         return eventService.delete(id);

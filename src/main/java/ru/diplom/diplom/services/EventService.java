@@ -68,6 +68,42 @@ public class EventService {
     }
 
     @Transactional
+    public EventVolunteeringDTO updateVolunteeringEvent(Integer eventId, EventVolunteeringDTO dto) {
+        Event existingEvent = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Мероприятие не найдено"));
+
+        if (!EventType.волонтерство.equals(existingEvent.getType())) {
+            throw new RuntimeException("Можно обновлять только волонтерские мероприятия");
+        }
+
+        if (dto.getName() != null) {
+            existingEvent.setName(dto.getName());
+        }
+        if (dto.getDescription() != null) {
+            existingEvent.setDescription(dto.getDescription());
+        }
+        if (dto.getStartDate() != null) {
+            existingEvent.setStartDate(dto.getStartDate());
+        }
+        if (dto.getEndDate() != null) {
+            existingEvent.setEndDate(dto.getEndDate());
+        }
+        if (dto.getPoints() != null) {
+            existingEvent.setPoints(dto.getPoints());
+        }
+        if (dto.getPhotoUrl() != null) {
+            existingEvent.setPhotoUrl(dto.getPhotoUrl());
+        }
+        if (dto.getMaxParticipants() != null) {
+            existingEvent.setMaxParticipants(dto.getMaxParticipants());
+        }
+
+        Event updatedEvent = eventRepository.save(existingEvent);
+
+        return convertToVolunteeringDTO(updatedEvent);
+    }
+
+    @Transactional
     public EventHackathonDTO createHackathonEvent( Integer authorId,EventHackathonDTO dto) {
         User author = userRepository.findById(authorId)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
@@ -94,6 +130,54 @@ public class EventService {
     }
 
     @Transactional
+    public EventHackathonDTO updateHackathonEvent(Integer eventId, EventHackathonDTO dto) {
+        Event existingEvent = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Хакатон не найден"));
+
+        if (!EventType.хакатон.equals(existingEvent.getType())) {
+            throw new RuntimeException("Можно обновлять только хакатоны");
+        }
+
+        if (dto.getName() != null) {
+            existingEvent.setName(dto.getName());
+        }
+        if (dto.getDescription() != null) {
+            existingEvent.setDescription(dto.getDescription());
+        }
+        if (dto.getStartDate() != null) {
+            existingEvent.setStartDate(dto.getStartDate());
+        }
+        if (dto.getEndDate() != null) {
+            existingEvent.setEndDate(dto.getEndDate());
+        }
+        if (dto.getPoints1st() != null) {
+            existingEvent.setPoints1st(dto.getPoints1st());
+        }
+        if (dto.getPoints2nd() != null) {
+            existingEvent.setPoints2nd(dto.getPoints2nd());
+        }
+        if (dto.getPoints3rd() != null) {
+            existingEvent.setPoints3rd(dto.getPoints3rd());
+        }
+        if (dto.getPointsParticipation() != null) {
+            existingEvent.setPointsParticipation(dto.getPointsParticipation());
+        }
+        if (dto.getPhotoUrl() != null) {
+            existingEvent.setPhotoUrl(dto.getPhotoUrl());
+        }
+        if (dto.getMaxParticipants() != null) {
+            existingEvent.setMaxParticipants(dto.getMaxParticipants());
+        }
+        if (dto.getMaxTeamSize() != null) {
+            existingEvent.setMaxTeamSize(dto.getMaxTeamSize());
+        }
+
+        Event updatedEvent = eventRepository.save(existingEvent);
+
+        return convertToHackathonDTO(updatedEvent);
+    }
+
+    @Transactional
     public EventPartnersHackathonDTO createPartnersHackathonEvent(Integer authorId, EventPartnersHackathonDTO dto) {
         User author = userRepository.findById(authorId)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
@@ -115,6 +199,48 @@ public class EventService {
 
         Event savedEvent = eventRepository.save(event);
         return convertToPartnersHackathonDTO(savedEvent);
+    }
+
+    @Transactional
+    public EventPartnersHackathonDTO updatePartnersHackathonEvent(Integer eventId, EventPartnersHackathonDTO dto) {
+        Event existingEvent = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Хакатон от партнера не найден"));
+
+        if (!EventType.хакатон_от_партнера.equals(existingEvent.getType())) {
+            throw new RuntimeException("Можно обновлять только хакатоны от партнера");
+        }
+
+        if (dto.getName() != null) {
+            existingEvent.setName(dto.getName());
+        }
+        if (dto.getDescription() != null) {
+            existingEvent.setDescription(dto.getDescription());
+        }
+        if (dto.getStartDate() != null) {
+            existingEvent.setStartDate(dto.getStartDate());
+        }
+        if (dto.getEndDate() != null) {
+            existingEvent.setEndDate(dto.getEndDate());
+        }
+        if (dto.getPoints1st() != null) {
+            existingEvent.setPoints1st(dto.getPoints1st());
+        }
+        if (dto.getPoints2nd() != null) {
+            existingEvent.setPoints2nd(dto.getPoints2nd());
+        }
+        if (dto.getPoints3rd() != null) {
+            existingEvent.setPoints3rd(dto.getPoints3rd());
+        }
+        if (dto.getPointsParticipation() != null) {
+            existingEvent.setPointsParticipation(dto.getPointsParticipation());
+        }
+        if (dto.getPhotoUrl() != null) {
+            existingEvent.setPhotoUrl(dto.getPhotoUrl());
+        }
+
+        Event updatedEvent = eventRepository.save(existingEvent);
+
+        return convertToPartnersHackathonDTO(updatedEvent);
     }
 
 
