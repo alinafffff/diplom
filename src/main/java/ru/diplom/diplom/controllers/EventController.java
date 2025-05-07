@@ -143,9 +143,28 @@ public class EventController {
             @RequestParam String filter) {
         System.out.println("query = " + query + ", filter = " + filter);
 
-        List<?> result = eventService.searchByFilter(query, filter); // или другой твой сервис
+        List<?> result = eventService.searchByFilter(query, filter);
         return ResponseEntity.ok(result);
     }
 
+
+    @PutMapping("/{eventId}/confirmRequest")
+    public ResponseEntity<Void> confirmRequests(@PathVariable Integer eventId) {
+        boolean isConfirmed = eventService.confirmStudsovetRequest(eventId);
+        if (isConfirmed) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    @PutMapping("/{eventId}/rejectRequest")
+    public ResponseEntity<Void> rejectRequests(@PathVariable Integer eventId) {
+        boolean isRejected = eventService.rejectStudsovetRequest(eventId);
+        if (isRejected) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 }

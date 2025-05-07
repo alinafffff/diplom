@@ -237,6 +237,27 @@ public class NewsService {
         return n;
     }
 
+    public boolean confirmStudsovetRequest(Integer newsId) {
+        Optional<News> dto = newsRepository.findById(newsId);
+        if (dto.isPresent()) {
+            News updatedNews = dto.get();
+            updatedNews.setIsRejected(false);
+            newsRepository.save(updatedNews);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean rejectStudsovetRequest(Integer newsId) {
+        Optional<News> dto = newsRepository.findById(newsId);
+        if (dto.isPresent()) {
+            News updatedNews = dto.get();
+            updatedNews.setIsRejected(true);
+            newsRepository.save(updatedNews);
+            return true;
+        }
+        return false;
+    }
     @Transactional
     public List<?> searchDekanatNews(String query, Integer myId, String filter) {
         Role role = roleRepository.findByName(filter);

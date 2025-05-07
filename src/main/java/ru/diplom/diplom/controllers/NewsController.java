@@ -94,6 +94,23 @@ public class NewsController {
         return newsService.getNewsStudsovetRejectedRequests();
     }
 
-
+    @PutMapping("/{newsId}/confirmRequest")
+    public ResponseEntity<Void> confirmRequests(@PathVariable Integer newsId) {
+        boolean isConfirmed = newsService.confirmStudsovetRequest(newsId);
+        if (isConfirmed) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    @PutMapping("/{newsId}/rejectRequest")
+    public ResponseEntity<Void> rejectRequests(@PathVariable Integer newsId) {
+        boolean isRejected = newsService.rejectStudsovetRequest(newsId);
+        if (isRejected) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 }

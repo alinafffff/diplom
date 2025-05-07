@@ -580,6 +580,27 @@ public class EventService {
         }
     }
 
+    public boolean confirmStudsovetRequest(Integer eventId) {
+        Optional<Event> dto = eventRepository.findById(eventId);
+        if (dto.isPresent()) {
+            Event updated = dto.get();
+            updated.setIsRejected(false);
+            eventRepository.save(updated);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean rejectStudsovetRequest(Integer eventId) {
+        Optional<Event> dto = eventRepository.findById(eventId);
+        if (dto.isPresent()) {
+            Event updated = dto.get();
+            updated.setIsRejected(true);
+            eventRepository.save(updated);
+            return true;
+        }
+        return false;
+    }
 
     public Event getOne(int id) {
         Optional<Event> eventOptional = eventRepository.findById(id);
