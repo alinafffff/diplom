@@ -110,6 +110,16 @@ public class EventController {
         return eventService.getAMyEvents(myId);
     }
 
+    @GetMapping("/findAllStudsovetEventsRequests")
+    public List<?> getAllStudsovetEventsRequests() {
+        return eventService.getEventStudsovetRequests();
+    }
+
+    @GetMapping("/findAllStudsovetRejectedEventsRequests")
+    public List<?> getAllStudsovetRejectedEventsRequests() {
+        return eventService.getEventStudsovetRejectedRequests();
+    }
+
     @GetMapping("/findArchiveById/{myId}")
     public List<?> getAllMyArchivedEvents(@PathVariable Integer myId) {
         return eventService.getAllMyArchivedEvents(myId);
@@ -125,6 +135,16 @@ public class EventController {
     public ResponseEntity<List<?>> searchArchivedEvents(@PathVariable Integer myId, @RequestParam String query, @RequestParam String filter) {
         List<?> n = eventService.searchArchivedEvents(query, myId, filter);
         return ResponseEntity.ok(n);
+    }
+
+    @GetMapping("/searchStudsovet")
+    public ResponseEntity<?> searchAllStudsovetNewsAndEvents(
+            @RequestParam String query,
+            @RequestParam String filter) {
+        System.out.println("query = " + query + ", filter = " + filter);
+
+        List<?> result = eventService.searchByFilter(query, filter); // или другой твой сервис
+        return ResponseEntity.ok(result);
     }
 
 

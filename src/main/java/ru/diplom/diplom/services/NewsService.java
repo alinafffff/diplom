@@ -75,6 +75,44 @@ public class NewsService {
                 .collect(Collectors.toList());
     }
 
+    public List<NewsDTO> getNewsStudsovetRequests() {
+        String roleName = "студсовет";
+        return newsRepository.findAll().stream()
+                .filter(news -> {
+                    boolean isMatchingRole = userRepository.findById(news.getAuthor())
+                            .flatMap(user -> roleRepository.findById(user.getRole()))
+                            .map(role -> role.getName().equalsIgnoreCase(roleName))
+                            .orElse(false);
+
+                    // 2. Фильтрация по статусу студсовета
+                    boolean condition = Boolean.TRUE.equals(news.getIsStudentCouncilRequest())
+                            && (news.getIsRejected()==null);
+
+                    return isMatchingRole && condition;
+                })
+                .map(this::convertToNewsDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<NewsDTO> getNewsStudsovetRejectedRequests() {
+        String roleName = "студсовет";
+        return newsRepository.findAll().stream()
+                .filter(news -> {
+                    boolean isMatchingRole = userRepository.findById(news.getAuthor())
+                            .flatMap(user -> roleRepository.findById(user.getRole()))
+                            .map(role -> role.getName().equalsIgnoreCase(roleName))
+                            .orElse(false);
+
+                    // 2. Фильтрация по статусу студсовета
+                    boolean condition = Boolean.TRUE.equals(news.getIsStudentCouncilRequest())
+                            && Boolean.TRUE.equals(news.getIsRejected());
+
+                    return isMatchingRole && condition;
+                })
+                .map(this::convertToNewsDTO)
+                .collect(Collectors.toList());
+    }
+
     public List<NewsCuratorDTO> getNewsByCuratorId(Integer curatorId) {
         List<News> newsList = newsRepository.findAllByAuthor(curatorId);
         return newsList.stream()

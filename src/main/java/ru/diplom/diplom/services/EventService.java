@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.diplom.diplom.dto.*;
 import ru.diplom.diplom.models.*;
 import ru.diplom.diplom.repositories.EventRepository;
+import ru.diplom.diplom.repositories.NewsRepository;
 import ru.diplom.diplom.repositories.RoleRepository;
 import ru.diplom.diplom.repositories.UserRepository;
 
@@ -26,6 +28,8 @@ public class EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final NewsRepository newsRepository;
+    private final NewsService newsService;
 
     public void deleteById(int id) {
         eventRepository.deleteById(id);
@@ -369,6 +373,44 @@ public class EventService {
                 .toList();
     }
 
+    public List<?> getEventStudsovetRequests() {
+        String roleName = "студсовет";
+        return eventRepository.findAll().stream()
+                .filter(event -> {
+                    boolean isMatchingRole = userRepository.findById(event.getCreatedBy())
+                            .flatMap(user -> roleRepository.findById(user.getRole()))
+                            .map(role -> role.getName().equalsIgnoreCase(roleName))
+                            .orElse(false);
+
+                    // 2. Фильтрация по статусу студсовета
+                    boolean condition = Boolean.TRUE.equals(event.getIsStudentCouncilRequest())
+                            && (event.getIsRejected()==null);
+
+                    return isMatchingRole && condition;
+                })
+                .map(this::convertToSpecificDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<?> getEventStudsovetRejectedRequests() {
+        String roleName = "студсовет";
+        return eventRepository.findAll().stream()
+                .filter(event -> {
+                    boolean isMatchingRole = userRepository.findById(event.getCreatedBy())
+                            .flatMap(user -> roleRepository.findById(user.getRole()))
+                            .map(role -> role.getName().equalsIgnoreCase(roleName))
+                            .orElse(false);
+
+                    // 2. Фильтрация по статусу студсовета
+                    boolean condition = Boolean.TRUE.equals(event.getIsStudentCouncilRequest())
+                            && Boolean.TRUE.equals(event.getIsRejected());
+
+                    return isMatchingRole && condition;
+                })
+                .map(this::convertToSpecificDTO)
+                .collect(Collectors.toList());
+    }
+
     public List<?> getAllMyArchivedEvents(Integer myId) {
         LocalDateTime now = LocalDateTime.now();
         return eventRepository.findAllByCreatedBy(myId)
@@ -472,6 +514,72 @@ public class EventService {
                 .map(this::convertToSpecificDTO)
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public List<?> searchByFilter(String query, String filter) {
+        String roleName = "студсовет";
+        switch (filter.toLowerCase()) {
+            case "новости":
+                return newsRepository.findByContentContainingIgnoreCase(query).stream()
+                        .filter(news -> {
+                            boolean isMatchingRole = userRepository.findById(news.getAuthor())
+                                    .flatMap(user -> roleRepository.findById(user.getRole()))
+                                    .map(role -> role.getName().equalsIgnoreCase(roleName))
+                                    .orElse(false);
+                            boolean condition = Boolean.TRUE.equals(news.getIsStudentCouncilRequest())
+                                    && (news.getIsRejected() == null);
+                            return isMatchingRole && condition;
+                        })
+                        .map(this::convertToNewsDTO)
+                        .collect(Collectors.toList());
+
+            case "мероприятия":
+                return eventRepository.findByDescriptionContainingIgnoreCase(query).stream()
+                        .filter(event -> {
+                            boolean isMatchingRole = userRepository.findById(event.getCreatedBy())
+                                    .flatMap(user -> roleRepository.findById(user.getRole()))
+                                    .map(role -> role.getName().equalsIgnoreCase(roleName))
+                                    .orElse(false);
+                            boolean condition = Boolean.TRUE.equals(event.getIsStudentCouncilRequest())
+                                    && (event.getIsRejected() == null);
+                            return isMatchingRole && condition;
+                        })
+                        .map(this::convertToSpecificDTO)
+                        .collect(Collectors.toList());
+
+            case "отклоненные новости":
+                return newsRepository.findByContentContainingIgnoreCase(query).stream()
+                        .filter(news -> {
+                            boolean isMatchingRole = userRepository.findById(news.getAuthor())
+                                    .flatMap(user -> roleRepository.findById(user.getRole()))
+                                    .map(role -> role.getName().equalsIgnoreCase(roleName))
+                                    .orElse(false);
+                            boolean condition = Boolean.TRUE.equals(news.getIsStudentCouncilRequest())
+                                    && Boolean.TRUE.equals(news.getIsRejected());
+                            return isMatchingRole && condition;
+                        })
+                        .map(this::convertToNewsDTO)
+                        .collect(Collectors.toList());
+
+            case "отклоненные мероприятия":
+                return eventRepository.findByDescriptionContainingIgnoreCase(query).stream()
+                        .filter(event -> {
+                            boolean isMatchingRole = userRepository.findById(event.getCreatedBy())
+                                    .flatMap(user -> roleRepository.findById(user.getRole()))
+                                    .map(role -> role.getName().equalsIgnoreCase(roleName))
+                                    .orElse(false);
+                            boolean condition = Boolean.TRUE.equals(event.getIsStudentCouncilRequest())
+                                    && Boolean.TRUE.equals(event.getIsRejected());
+                            return isMatchingRole && condition;
+                        })
+                        .map(this::convertToSpecificDTO)
+                        .collect(Collectors.toList());
+
+            default:
+                return Collections.emptyList(); // или выбросить исключение
+        }
+    }
+
 
     public Event getOne(int id) {
         Optional<Event> eventOptional = eventRepository.findById(id);
@@ -582,5 +690,23 @@ public class EventService {
                 e.getPhotoUrl(),
                 e.getIsStudentCouncilRequest(),
                 e.getIsRejected());
+    }
+
+    private NewsDTO convertToNewsDTO(News news){
+
+        String authorRoleName = userRepository.findById(news.getAuthor())
+                .flatMap(user -> roleRepository.findById(user.getRole()))
+                .map(Role::getName)
+                .orElse("Неизвестная роль");
+
+        return NewsDTO.builder()
+                .id(news.getId())
+                .createdAt(news.getCreatedAt() != null ? news.getCreatedAt() : LocalDateTime.now())
+                .author(news.getAuthor())
+                .authorRole(authorRoleName)
+                .title(news.getTitle())
+                .description(news.getContent())
+                .photoUrl(news.getPhotoUrl())
+                .build();
     }
 }

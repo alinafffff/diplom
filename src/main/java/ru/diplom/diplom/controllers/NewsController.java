@@ -84,5 +84,16 @@ public class NewsController {
         return ResponseEntity.ok(updated);
     }
 
+    @GetMapping("/allSudsovetRequests")
+    public List<NewsDTO> getAllStudsovetRequests() {
+        return newsService.getNewsStudsovetRequests();
+    }
+
+    @GetMapping("/allRejectedSudsovetRequests")
+    public List<NewsDTO> getAllRejectedStudsovetRequests() {
+        return newsService.getNewsStudsovetRejectedRequests();
+    }
+
+
 
 }
