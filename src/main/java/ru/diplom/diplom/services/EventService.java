@@ -262,6 +262,24 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
+    public List<?> getAllArchiveEventsWithTypeSpecificDTOs() {
+        LocalDateTime now = LocalDateTime.now();
+        return eventRepository.findAll().stream()
+                .filter(event -> {
+                    Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
+                    Boolean isRejected = event.getIsRejected();
+                    LocalDateTime startDate = event.getStartDate();
+
+                    boolean dateCondition = startDate != null && !startDate.isAfter(now);
+                    boolean statusCondition = Boolean.FALSE.equals(isStudentCouncilRequest) ||
+                            (Boolean.TRUE.equals(isStudentCouncilRequest) && Boolean.FALSE.equals(isRejected));
+
+                    return dateCondition && statusCondition;
+                })
+                .map(this::convertToSpecificDTO)
+                .collect(Collectors.toList());
+    }
+
     public List<?> getFilteredEventsByTypes(List<String> eventTypes) {
         LocalDateTime now = LocalDateTime.now();
         return eventRepository.findAll().stream()
@@ -274,6 +292,28 @@ public class EventService {
                     LocalDateTime startDate = event.getStartDate();
 
                     boolean dateCondition = startDate != null && startDate.isAfter(now);
+                    boolean statusCondition = Boolean.FALSE.equals(isStudentCouncilRequest) ||
+                            (Boolean.TRUE.equals(isStudentCouncilRequest) &&
+                                    Boolean.FALSE.equals(isRejected));
+
+                    return correctType && dateCondition && statusCondition;
+                })
+                .map(this::convertToSpecificDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<?> getFilteredArchivedEventsByTypes(List<String> eventTypes) {
+        LocalDateTime now = LocalDateTime.now();
+        return eventRepository.findAll().stream()
+                .filter(event -> {
+                    boolean correctType = eventTypes.stream()
+                            .anyMatch(type -> type.equalsIgnoreCase(event.getType().getName()));
+
+                    Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
+                    Boolean isRejected = event.getIsRejected();
+                    LocalDateTime startDate = event.getStartDate();
+
+                    boolean dateCondition = startDate != null && !startDate.isAfter(now);
                     boolean statusCondition = Boolean.FALSE.equals(isStudentCouncilRequest) ||
                             (Boolean.TRUE.equals(isStudentCouncilRequest) &&
                                     Boolean.FALSE.equals(isRejected));
@@ -302,12 +342,47 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
+    public List<?> getStudentCouncilRequestArchivedEvents() {
+        LocalDateTime now = LocalDateTime.now();
+        return eventRepository.findAll().stream()
+                .filter(event -> {
+                    Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
+                    Boolean isRejected = event.getIsRejected();
+                    LocalDateTime startDate = event.getStartDate();
+
+                    boolean dateCondition = startDate != null && !startDate.isAfter(now);
+                    boolean statusCondition = Boolean.TRUE.equals(isStudentCouncilRequest)
+                            && Boolean.FALSE.equals(isRejected);
+
+                    return dateCondition && statusCondition;
+                })
+                .map(this::convertToSpecificDTO)
+                .collect(Collectors.toList());
+    }
+
+
     public List<?> getAMyEvents(Integer myId) {
+        LocalDateTime now = LocalDateTime.now();
         List<Event> eventsList = eventRepository.findAllByCreatedBy(myId);
         return eventsList.stream()
                 .map(this::convertToSpecificDTO)
                 .toList();
     }
+
+    public List<?> getAllMyArchivedEvents(Integer myId) {
+        LocalDateTime now = LocalDateTime.now();
+        return eventRepository.findAllByCreatedBy(myId)
+                .stream()
+                .filter(event -> {
+                    LocalDateTime startDate = event.getStartDate();
+                    boolean dateCondition = startDate != null && !startDate.isAfter(now);
+                    return dateCondition;
+                })
+                .map(this::convertToSpecificDTO)
+                .collect(Collectors.toList());
+    }
+
+
 
     @Transactional
     public List<?> searchEvents(String query, Integer myId, String filter) {
@@ -338,6 +413,50 @@ public class EventService {
                         case "Волонтерство":
                             statusCondition = "волонтерство".equalsIgnoreCase(event.getType().getName())
                             && tmpCondition;
+                            break;
+                        case "Хакатоны":
+                            statusCondition = (("хакатон".equalsIgnoreCase(event.getType().getName())
+                                    || "хакатон_от_партнера".equalsIgnoreCase(event.getType().getName())))
+                                    && tmpCondition;
+                            break;
+                        default: // Все мероприятия
+                            statusCondition = tmpCondition;
+                    }
+
+                    return dateCondition && statusCondition;
+                })
+                .map(this::convertToSpecificDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<?> searchArchivedEvents(String query, Integer myId, String filter) {
+        LocalDateTime now = LocalDateTime.now();
+
+        return eventRepository.findByDescriptionContainingIgnoreCase(query).stream()
+                .filter(event -> {
+                    Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
+                    Boolean isRejected = event.getIsRejected();
+                    LocalDateTime startDate = event.getStartDate();
+
+                    boolean dateCondition = startDate != null && !startDate.isAfter(now);
+                    boolean statusCondition;
+                    boolean tmpCondition = Boolean.FALSE.equals(isStudentCouncilRequest)
+                            || (Boolean.TRUE.equals(isStudentCouncilRequest)
+                            && Boolean.FALSE.equals(isRejected));
+
+                    // Условия в зависимости от фильтра
+                    switch (filter) {
+                        case "Мои новости":
+                            statusCondition = event.getCreatedBy().equals(myId);
+                            break;
+                        case "Студсовет":
+                            statusCondition = Boolean.TRUE.equals(isStudentCouncilRequest)
+                                    && Boolean.FALSE.equals(isRejected);
+                            break;
+                        case "Волонтерство":
+                            statusCondition = "волонтерство".equalsIgnoreCase(event.getType().getName())
+                                    && tmpCondition;
                             break;
                         case "Хакатоны":
                             statusCondition = (("хакатон".equalsIgnoreCase(event.getType().getName())

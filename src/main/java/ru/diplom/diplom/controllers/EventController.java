@@ -73,19 +73,36 @@ public class EventController {
         return eventService.delete(id);
     }
 
+
+
     @GetMapping("/allEvents")
     public List<?> getAllEvents() {
         return eventService.getAllEventsWithTypeSpecificDTOs();
     }
+
+    @GetMapping("/allArchiveEvents")
+    public List<?> getAllArchiveEvents() {
+        return eventService.getAllArchiveEventsWithTypeSpecificDTOs();
+    }
+
 
     @GetMapping("/findByTypes")
     public List<?> getEventsByTypes(@RequestParam List<String> types) {
         return eventService.getFilteredEventsByTypes(types);
     }
 
+    @GetMapping("/findArchivedByTypes")
+    public List<?> getArchivedEventsByTypes(@RequestParam List<String> types) {
+        return eventService.getFilteredArchivedEventsByTypes(types);
+    }
+
     @GetMapping("/allStudsovetEvents")
     public List<?> getAllStudsovetEvents() {
         return eventService.getStudentCouncilRequestEvents();
+    }
+    @GetMapping("/allStudsovetArchivedEvents")
+    public List<?> getAllStudsovetArchivedEvents() {
+        return eventService.getStudentCouncilRequestArchivedEvents();
     }
 
     @GetMapping("/findById/{myId}")
@@ -93,9 +110,20 @@ public class EventController {
         return eventService.getAMyEvents(myId);
     }
 
+    @GetMapping("/findArchiveById/{myId}")
+    public List<?> getAllMyArchivedEvents(@PathVariable Integer myId) {
+        return eventService.getAllMyArchivedEvents(myId);
+    }
+
     @GetMapping("/search/{myId}")
     public ResponseEntity<List<?>> searchEvents(@PathVariable Integer myId, @RequestParam String query, @RequestParam String filter) {
         List<?> n = eventService.searchEvents(query, myId, filter);
+        return ResponseEntity.ok(n);
+    }
+
+    @GetMapping("/searchArchived/{myId}")
+    public ResponseEntity<List<?>> searchArchivedEvents(@PathVariable Integer myId, @RequestParam String query, @RequestParam String filter) {
+        List<?> n = eventService.searchArchivedEvents(query, myId, filter);
         return ResponseEntity.ok(n);
     }
 
