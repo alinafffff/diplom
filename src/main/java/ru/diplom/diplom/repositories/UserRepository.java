@@ -16,6 +16,8 @@ public interface UserRepository extends JpaRepository<User,Integer> {
     List<User> findByRole(Integer role);
     List<User> findByLoginContainingIgnoreCaseOrSurnameContainingIgnoreCaseOrNameContainingIgnoreCaseOrPatronymicContainingIgnoreCase(String login, String surname, String name, String patronymic);
     List<User> findByGroup(Integer groupId);
+    @Query("SELECT u FROM User u WHERE u.role = :role ORDER BY u.points DESC")
+    List<User> findByRoleOrderedByPointsDesc(@Param("role") int role);
 
     @Query("""
     SELECT u FROM User u
@@ -23,6 +25,12 @@ public interface UserRepository extends JpaRepository<User,Integer> {
     AND u.group = :groupId
     """)
     List<User> searchByFullName(@Param("query") String query, @Param("groupId") Integer groupId);
+
+    @Query("""
+    SELECT u FROM User u
+    WHERE LOWER(CONCAT(u.name, ' ', u.surname, ' ', u.patronymic)) LIKE LOWER(CONCAT('%', :query, '%'))
+    """)
+    List<User> searchStudentsByFullName(@Param("query") String query);
 
 
 }

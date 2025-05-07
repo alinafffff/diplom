@@ -39,6 +39,12 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public List<UserGroupPointsDTO> getAllUsersPoints() {
+        return userRepository.findByRoleOrderedByPointsDesc(4).stream()
+                .map(this::convertToUserGroupPointsDTO)
+                .collect(Collectors.toList());
+    }
+
     public List<UserAdminDTO> getUsersAdminByRole(Integer roleId) {
         return userRepository.findByRole(roleId).stream()
                 .map(this::convertToDTO)
@@ -126,6 +132,14 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public List<UserGroupPointsDTO> searchStudentsByFullName(String query) {
+        return userRepository.searchStudentsByFullName(query)
+                .stream()
+                .map(this::convertToUserGroupPointsDTO)
+                .collect(Collectors.toList());
+    }
+
 
     public List<UserGroupDTO> getUsersByGroupId(Integer groupId) {
         List<User> users = userRepository.findByGroup(groupId);
@@ -195,6 +209,29 @@ public class UserService {
                 .id(user.getId())
                 .fullName(fullName)
                 .groupName(groupName)
+                .groupId(groupId)
+                .build();
+    }
+
+    public UserGroupPointsDTO convertToUserGroupPointsDTO(User user) {
+        String fullName = user.getSurname() + " " + user.getName() + " " +
+                (user.getPatronymic() != null ? user.getPatronymic() : "");
+
+        String groupName = "Без группы";
+        Integer groupId = user.getGroup();
+
+        if (groupId != null) {
+            Optional<Group> groupOptional = groupRepository.findById(groupId);
+            if (groupOptional.isPresent()) {
+                groupName = groupService.convertToGroupDTO(groupOptional.get()).getName();
+            }
+        }
+
+        return UserGroupPointsDTO.builder()
+                .id(user.getId())
+                .fullName(fullName)
+                .groupName(groupName)
+                .points(user.getPoints())
                 .groupId(groupId)
                 .build();
     }

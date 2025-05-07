@@ -22,6 +22,11 @@ public class UserController {
         return userService.getAllUsersAdmin();
     }
 
+    @GetMapping("/allSudentsAndPoints")
+    public List<UserGroupPointsDTO> getAllStudentsPoints() {
+        return userService.getAllUsersPoints();
+    }
+
     @GetMapping("/byRole")
     public List<UserAdminDTO> getUsersAdminByRole(@RequestParam Integer roleId) {
         return userService.getUsersAdminByRole(roleId);
@@ -92,6 +97,14 @@ public class UserController {
             @RequestParam("groupId") Integer groupId
     ) {
         List<UserGroupDTO> users = userService.searchUsersByFullName(query, groupId);
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/searchStudentsPoints")
+    public ResponseEntity<List<UserGroupPointsDTO>> searchStudents(
+            @RequestParam("query") String query
+    ) {
+        List<UserGroupPointsDTO> users = userService.searchStudentsByFullName(query);
         return ResponseEntity.ok(users);
     }
 
