@@ -1,6 +1,8 @@
 package ru.diplom.diplom.repositories;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -57,5 +59,30 @@ public interface TeamUserRepository extends JpaRepository<TeamUser,Integer> {
     WHERE t.my_event_id = :eventId
     """, nativeQuery = true)
     List<Team> findTeamsByEventId(@Param("eventId") Integer eventId);
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+        DELETE FROM team_my_user 
+        WHERE my_user_id = :userId 
+        AND team_id IN (
+            SELECT id FROM team WHERE my_event_id = :eventId
+        )
+        """, nativeQuery = true)
+    void deleteByUserIdAndEventId(@Param("userId") Integer userId, @Param("eventId") Integer eventId);
+
+    @Query(value = """
+        SELECT t.id FROM team t
+        LEFT JOIN team_my_user tmu ON t.id = tmu.team_id
+        WHERE tmu.id IS NULL AND t.my_event_id = :eventId
+        """, nativeQuery = true)
+    List<Integer> findEmptyTeamIdsByEvent(@Param("eventId") Integer eventId);
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+        DELETE FROM team WHERE id = :teamId
+        """, nativeQuery = true)
+    void deleteTeamById(@Param("teamId") Integer teamId);
 
 }

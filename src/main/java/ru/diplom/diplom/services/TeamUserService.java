@@ -1,5 +1,6 @@
 package ru.diplom.diplom.services;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,16 @@ public class TeamUserService {
                 )
                 .map(this::convertToUserEventShortDTO)
                 .toList();
+    }
+
+    @Transactional
+    public void removeUserFromEvent(Integer userId, Integer eventId) {
+        teamUserRepository.deleteByUserIdAndEventId(userId, eventId);
+
+        List<Integer> emptyTeams = teamUserRepository.findEmptyTeamIdsByEvent(eventId);
+        for (Integer teamId : emptyTeams) {
+            teamUserRepository.deleteTeamById(teamId);
+        }
     }
 
 

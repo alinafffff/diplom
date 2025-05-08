@@ -27,5 +27,14 @@ public class TeamUserController {
         return ResponseEntity.ok(teamUserService.getUsersByEventId(eventId));
     }
 
+    @DeleteMapping("/removeStudentFromEvent/{eventId}/user/{userId}")
+    public ResponseEntity<Void> removeStudentFromEvent(
+            @PathVariable Integer eventId,
+            @PathVariable Integer userId
+    ) {
+        teamUserService.removeUserFromEvent(userId, eventId);
+        return ResponseEntity.noContent().build();
+    }
+
 
 }
