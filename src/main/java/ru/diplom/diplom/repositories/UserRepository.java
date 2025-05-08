@@ -28,6 +28,17 @@ public interface UserRepository extends JpaRepository<User,Integer> {
     List<User> searchByFullName(@Param("query") String query, @Param("groupId") Integer groupId);
 
     @Query("""
+            SELECT mu
+            FROM User mu
+            JOIN TeamUser tmu ON mu.id = tmu.user
+            JOIN Team t ON tmu.team = t.id
+            WHERE LOWER(CONCAT(mu.name, ' ', mu.surname, ' ', mu.patronymic)) LIKE LOWER(CONCAT('%', :query, '%')) 
+            AND t.myEvent = :eventId
+            """)
+    List<User> searchByFullNameAndEventId(@Param("query") String query, @Param("eventId") Integer eventId);
+
+
+    @Query("""
     SELECT u FROM User u
     WHERE LOWER(CONCAT(u.name, ' ', u.surname, ' ', u.patronymic)) LIKE LOWER(CONCAT('%', :query, '%'))
     """)

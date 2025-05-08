@@ -8,6 +8,7 @@ import ru.diplom.diplom.dto.UserEventShortDTO;
 import ru.diplom.diplom.models.Event;
 import ru.diplom.diplom.models.Team;
 import ru.diplom.diplom.models.TeamUser;
+import ru.diplom.diplom.models.User;
 
 import java.util.List;
 
@@ -38,4 +39,23 @@ public interface TeamUserRepository extends JpaRepository<TeamUser,Integer> {
                 WHERE tmu.my_user_id = :studentId;
             """, nativeQuery = true)
     List<Event> findEventsByStudentId(@Param("studentId") Integer studentId);
+
+    @Query(value = """
+    SELECT u.*
+    FROM team_my_user tmu
+    JOIN my_user u ON tmu.my_user_id = u.id
+    JOIN team t ON tmu.team_id = t.id
+    WHERE t.my_event_id = :eventId
+    """, nativeQuery = true)
+    List<User> findUsersByEventId(@Param("eventId") Integer eventId);
+
+    @Query(value = """
+    SELECT t.*
+    FROM team_my_user tmu
+    JOIN my_user u ON tmu.my_user_id = u.id
+    JOIN team t ON tmu.team_id = t.id
+    WHERE t.my_event_id = :eventId
+    """, nativeQuery = true)
+    List<Team> findTeamsByEventId(@Param("eventId") Integer eventId);
+
 }

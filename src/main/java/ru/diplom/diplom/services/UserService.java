@@ -138,6 +138,14 @@ public class UserService {
     }
 
     @Transactional
+    public List<UserGroupDTO> searchUsersByFullNameAndEventId(String query, Integer eventId) {
+        return userRepository.searchByFullNameAndEventId(query, eventId)
+                .stream()
+                .map(this::convertToUserDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
     public List<UserGroupPointsDTO> searchStudentsByFullName(String query) {
         return userRepository.searchStudentsByFullName(query)
                 .stream()

@@ -22,4 +22,10 @@ public class TeamUserController {
         return ResponseEntity.ok(events);
     }
 
+    @GetMapping("/event/{eventId}/teams")
+    public ResponseEntity<List<?>> getUsersByEvent(@PathVariable Integer eventId) {
+        return ResponseEntity.ok(teamUserService.getUsersByEventId(eventId));
+    }
+
+
 }

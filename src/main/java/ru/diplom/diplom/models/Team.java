@@ -29,8 +29,8 @@ public class Team {
     @Column(name = "diploma")
     private String diploma;
 
-    @Column(name = "is_confirmed", columnDefinition = "BOOLEAN DEFAULT false")
-    private Boolean isConfirmed = false;
+    @Column(name = "is_confirmed")
+    private Boolean isConfirmed;
 
     @PrePersist
     @PreUpdate

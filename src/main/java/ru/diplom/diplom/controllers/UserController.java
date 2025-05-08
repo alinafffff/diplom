@@ -102,6 +102,16 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    @GetMapping("/searchEventStudents")
+    public ResponseEntity<List<UserGroupDTO>> searchEventUsers(
+            @RequestParam("query") String query,
+            @RequestParam("eventId") Integer eventId
+    ) {
+        List<UserGroupDTO> users = userService.searchUsersByFullNameAndEventId(query,eventId);
+        return ResponseEntity.ok(users);
+    }
+
+
     @GetMapping("/searchStudentsPoints")
     public ResponseEntity<List<UserGroupPointsDTO>> searchStudents(
             @RequestParam("query") String query
