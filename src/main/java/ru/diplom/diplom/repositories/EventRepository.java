@@ -17,5 +17,4 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
     List<Event> findByType(EventType type);
     List<Event> findAllByCreatedBy(Integer id);
     List<Event> findByDescriptionContainingIgnoreCase(String query);
-
 }

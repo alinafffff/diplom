@@ -3,13 +3,11 @@ package ru.diplom.diplom.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.diplom.diplom.dto.EventHackathonDTO;
-import ru.diplom.diplom.dto.EventPartnersHackathonDTO;
-import ru.diplom.diplom.dto.EventVolunteeringDTO;
-import ru.diplom.diplom.dto.NewsDTO;
+import ru.diplom.diplom.dto.*;
 import ru.diplom.diplom.models.Event;
 import ru.diplom.diplom.models.EventType;
 import ru.diplom.diplom.services.EventService;
+import ru.diplom.diplom.services.UserService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +19,8 @@ import java.util.stream.Collectors;
 public class EventController {
     @Autowired
     private EventService eventService;
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/{id}")
     public Event getOne(@PathVariable int id) {

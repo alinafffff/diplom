@@ -4,12 +4,11 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.diplom.diplom.dto.*;
 import ru.diplom.diplom.models.*;
 import ru.diplom.diplom.models.Role;
-import ru.diplom.diplom.repositories.DirectionRepository;
+import ru.diplom.diplom.repositories.EventRepository;
 import ru.diplom.diplom.repositories.GroupRepository;
 import ru.diplom.diplom.repositories.RoleRepository;
 import ru.diplom.diplom.repositories.UserRepository;
@@ -25,6 +24,7 @@ public class UserService {
     private final RoleRepository roleRepository;
 
     private final GroupRepository groupRepository;
+    private final EventRepository eventRepository;
     @Autowired
     private GroupService groupService;
 
@@ -43,6 +43,11 @@ public class UserService {
         return userRepository.findByRoleOrderedByPointsDesc(4).stream()
                 .map(this::convertToUserGroupPointsDTO)
                 .collect(Collectors.toList());
+    }
+
+    public Optional<UserProfileDTO> getUserProfileInfo(Integer userId){
+        return userRepository.findById(userId)
+                .map(this::convertToUserProfileDTO);
     }
 
     public List<UserAdminDTO> getUsersAdminByRole(Integer roleId) {
@@ -191,6 +196,8 @@ public class UserService {
         }
     }
 
+
+
     public UserGroupDTO convertToUserDTO(User user) {
         String fullName = user.getSurname() + " " + user.getName() + " " +
                 (user.getPatronymic() != null ? user.getPatronymic() : "");
@@ -212,7 +219,6 @@ public class UserService {
                 .groupId(groupId)
                 .build();
     }
-
     public UserGroupPointsDTO convertToUserGroupPointsDTO(User user) {
         String fullName = user.getSurname() + " " + user.getName() + " " +
                 (user.getPatronymic() != null ? user.getPatronymic() : "");
@@ -231,6 +237,30 @@ public class UserService {
                 .id(user.getId())
                 .fullName(fullName)
                 .groupName(groupName)
+                .points(user.getPoints())
+                .groupId(groupId)
+                .build();
+    }
+
+    public UserProfileDTO convertToUserProfileDTO(User user) {
+        String groupName = "Без группы";
+        Integer groupId = user.getGroup();
+
+        if (groupId != null) {
+            Optional<Group> groupOptional = groupRepository.findById(groupId);
+            if (groupOptional.isPresent()) {
+                groupName = groupService.convertToGroupDTO(groupOptional.get()).getName();
+            }
+        }
+
+        return UserProfileDTO.builder()
+                .id(user.getId())
+                .surname(user.getSurname())
+                .name(user.getName())
+                .patronymic(user.getPatronymic())
+                .groupName(groupName)
+                .phone(user.getPhone())
+                .email(user.getEmail())
                 .points(user.getPoints())
                 .groupId(groupId)
                 .build();

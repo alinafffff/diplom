@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.diplom.diplom.dto.*;
 import ru.diplom.diplom.models.*;
-import ru.diplom.diplom.repositories.EventRepository;
-import ru.diplom.diplom.repositories.NewsRepository;
-import ru.diplom.diplom.repositories.RoleRepository;
-import ru.diplom.diplom.repositories.UserRepository;
+import ru.diplom.diplom.repositories.*;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,6 +27,8 @@ public class EventService {
     private final RoleRepository roleRepository;
     private final NewsRepository newsRepository;
     private final NewsService newsService;
+    @Autowired
+    private final TeamUserRepository teamUserRepository;
 
     public void deleteById(int id) {
         eventRepository.deleteById(id);
@@ -272,9 +271,12 @@ public class EventService {
                 .filter(event -> {
                     Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
                     Boolean isRejected = event.getIsRejected();
-                    LocalDateTime startDate = event.getStartDate();
+                    LocalDateTime date = event.getStartDate();
+                    if(event.getEndDate()!= null){
+                        date = event.getEndDate();
+                    }
 
-                    boolean dateCondition = startDate != null && !startDate.isAfter(now);
+                    boolean dateCondition = date != null && !date.isAfter(now);
                     boolean statusCondition = Boolean.FALSE.equals(isStudentCouncilRequest) ||
                             (Boolean.TRUE.equals(isStudentCouncilRequest) && Boolean.FALSE.equals(isRejected));
 
@@ -308,6 +310,7 @@ public class EventService {
 
     public List<?> getFilteredArchivedEventsByTypes(List<String> eventTypes) {
         LocalDateTime now = LocalDateTime.now();
+
         return eventRepository.findAll().stream()
                 .filter(event -> {
                     boolean correctType = eventTypes.stream()
@@ -315,9 +318,12 @@ public class EventService {
 
                     Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
                     Boolean isRejected = event.getIsRejected();
-                    LocalDateTime startDate = event.getStartDate();
+                    LocalDateTime date = event.getStartDate();
+                    if(event.getEndDate()!= null){
+                        date = event.getEndDate();
+                    }
 
-                    boolean dateCondition = startDate != null && !startDate.isAfter(now);
+                    boolean dateCondition = date != null && !date.isAfter(now);
                     boolean statusCondition = Boolean.FALSE.equals(isStudentCouncilRequest) ||
                             (Boolean.TRUE.equals(isStudentCouncilRequest) &&
                                     Boolean.FALSE.equals(isRejected));
@@ -352,9 +358,12 @@ public class EventService {
                 .filter(event -> {
                     Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
                     Boolean isRejected = event.getIsRejected();
-                    LocalDateTime startDate = event.getStartDate();
+                    LocalDateTime date = event.getStartDate();
+                    if(event.getEndDate()!= null){
+                        date = event.getEndDate();
+                    }
 
-                    boolean dateCondition = startDate != null && !startDate.isAfter(now);
+                    boolean dateCondition = date != null && !date.isAfter(now);
                     boolean statusCondition = Boolean.TRUE.equals(isStudentCouncilRequest)
                             && Boolean.FALSE.equals(isRejected);
 
@@ -416,8 +425,11 @@ public class EventService {
         return eventRepository.findAllByCreatedBy(myId)
                 .stream()
                 .filter(event -> {
-                    LocalDateTime startDate = event.getStartDate();
-                    boolean dateCondition = startDate != null && !startDate.isAfter(now);
+                    LocalDateTime date = event.getStartDate();
+                    if(event.getEndDate()!= null){
+                        date = event.getEndDate();
+                    }
+                    boolean dateCondition = date != null && !date.isAfter(now);
                     return dateCondition;
                 })
                 .map(this::convertToSpecificDTO)
@@ -479,9 +491,12 @@ public class EventService {
                 .filter(event -> {
                     Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
                     Boolean isRejected = event.getIsRejected();
-                    LocalDateTime startDate = event.getStartDate();
+                    LocalDateTime date = event.getStartDate();
+                    if(event.getEndDate()!= null){
+                        date = event.getEndDate();
+                    }
 
-                    boolean dateCondition = startDate != null && !startDate.isAfter(now);
+                    boolean dateCondition = date != null && !date.isAfter(now);
                     boolean statusCondition;
                     boolean tmpCondition = Boolean.FALSE.equals(isStudentCouncilRequest)
                             || (Boolean.TRUE.equals(isStudentCouncilRequest)

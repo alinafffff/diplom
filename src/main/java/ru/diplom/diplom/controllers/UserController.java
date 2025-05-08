@@ -9,6 +9,8 @@ import ru.diplom.diplom.services.ProfileService;
 import ru.diplom.diplom.services.UserService;
 
 import java.util.List;
+import java.util.Optional;
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/inpit/users")
@@ -118,6 +120,18 @@ public class UserController {
         }
     }
 
+    @GetMapping("/getUserProfileInfo/{userId}")
+    public ResponseEntity<UserProfileDTO> getUserProfileByUserId(@PathVariable Integer userId) {
+        try {
+            Optional<UserProfileDTO> u = userService.getUserProfileInfo(userId);
+            return ResponseEntity.ok(u.get());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+
+
     @PutMapping("/updateInfoByUserId/{userId}")
     public ResponseEntity<UserMyInfoDTO> updateUserInfo(
             @PathVariable Integer userId,
@@ -126,6 +140,5 @@ public class UserController {
         UserMyInfoDTO updatedUser = userService.updateUserInfo(userId, userDto);
         return ResponseEntity.ok(updatedUser);
     }
-
 
 }
