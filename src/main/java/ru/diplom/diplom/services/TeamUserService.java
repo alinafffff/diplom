@@ -11,10 +11,7 @@ import ru.diplom.diplom.models.Event;
 import ru.diplom.diplom.models.Group;
 import ru.diplom.diplom.models.Team;
 import ru.diplom.diplom.models.User;
-import ru.diplom.diplom.repositories.EventRepository;
-import ru.diplom.diplom.repositories.GroupRepository;
-import ru.diplom.diplom.repositories.TeamRepository;
-import ru.diplom.diplom.repositories.TeamUserRepository;
+import ru.diplom.diplom.repositories.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +27,7 @@ public class TeamUserService {
     private final GroupService groupService;
     private final GroupRepository groupRepository;
     private final TeamRepository teamRepository;
+    private final UserRepository userRepository;
 
     public List<UserEventShortDTO> getEventsByStudentId(Integer studentId) {
         LocalDateTime now = LocalDateTime.now();
@@ -77,17 +75,68 @@ public class TeamUserService {
     public List<TeamEventDTO> getAllPartnerHackathonTeams() {
         return teamUserRepository.findAllPartnerHackathonTeams()
                 .stream()
-                .map(this::convertToTeamEventDTO)
+                .collect(Collectors.toMap(
+                        Team::getId,
+                        this::convertToTeamEventDTO,
+                        (existing, replacement) -> existing
+                ))
+                .values()
+                .stream()
+                .collect(Collectors.toList());
+    }
+
+    public List<TeamEventDTO> getAllConfirmedPartnerHackathons() {
+        return teamUserRepository.findAllConfirmedPartnerHackathons()
+                .stream()
+                .collect(Collectors.toMap(
+                        Team::getId,
+                        this::convertToTeamEventDTO,
+                        (existing, replacement) -> existing
+                ))
+                .values()
+                .stream()
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public Team confirmTeam(Integer teamId) {
+    public TeamEventDTO confirmTeam(Integer teamId) {
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new RuntimeException("Team not found with id: " + teamId));
-
+                .orElseThrow(() -> new RuntimeException("Team not found"));
         team.setIsConfirmed(true);
-        return teamRepository.save(team);
+        Team savedTeam = teamRepository.save(team);
+
+        awardPointsToTeamMembers(savedTeam);
+
+        return convertToTeamEventDTO(savedTeam);
+    }
+
+    private void awardPointsToTeamMembers(Team team) {
+        Event event = eventRepository.findById(team.getMyEvent())
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+
+        Integer pointsToAdd = determinePointsToAdd(team.getPlace(), event);
+
+        if (pointsToAdd != null && pointsToAdd > 0) {
+            List<User> teamMembers = teamUserRepository.findUsersByTeamId(team.getId());
+
+            teamMembers.forEach(user -> {
+                user.setPoints((user.getPoints() != null ? user.getPoints() : 0) + pointsToAdd);
+                userRepository.save(user);
+            });
+        }
+    }
+
+    private Integer determinePointsToAdd(Integer place, Event event) {
+        if (place == null) {
+            return event.getPointsParticipation();
+        }
+
+        switch (place) {
+            case 1: return event.getPoints1st();
+            case 2: return event.getPoints2nd();
+            case 3: return event.getPoints3rd();
+            default: return event.getPointsParticipation();
+        }
     }
 
     @Transactional
@@ -99,12 +148,7 @@ public class TeamUserService {
         return teamRepository.save(team);
     }
 
-    public List<TeamEventDTO> getAllConfirmedPartnerHackathons() {
-        return teamUserRepository.findAllConfirmedPartnerHackathons()
-                .stream()
-                .map(this::convertToTeamEventDTO)
-                .collect(Collectors.toList());
-    }
+
 
 
 

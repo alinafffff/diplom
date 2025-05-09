@@ -45,8 +45,8 @@ public class TeamUserController {
 
     @PutMapping("/{teamId}/confirm")
     public ResponseEntity<TeamEventDTO> confirmTeam(@PathVariable Integer teamId) {
-        Team team = teamUserService.confirmTeam(teamId);
-        return ResponseEntity.ok(teamUserService.convertToTeamEventDTO(team));
+        TeamEventDTO result = teamUserService.confirmTeam(teamId);
+        return ResponseEntity.ok(result);
     }
 
     @PutMapping("/{teamId}/reject")

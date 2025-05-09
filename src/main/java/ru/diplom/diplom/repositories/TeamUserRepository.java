@@ -117,4 +117,11 @@ public interface TeamUserRepository extends JpaRepository<TeamUser,Integer> {
     """, nativeQuery = true)
     List<Team> findAllConfirmedPartnerHackathons();
 
+    @Query(value = """
+    SELECT mu.* FROM my_user mu
+    JOIN team_my_user tmu ON mu.id = tmu.my_user_id
+    WHERE tmu.team_id = :teamId
+""", nativeQuery = true)
+    List<User> findUsersByTeamId(@Param("teamId") Integer teamId);
+
 }
