@@ -3,7 +3,9 @@ package ru.diplom.diplom.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.diplom.diplom.dto.TeamEventDTO;
 import ru.diplom.diplom.dto.UserEventShortDTO;
+import ru.diplom.diplom.models.Team;
 import ru.diplom.diplom.services.TeamUserService;
 
 import java.util.List;
@@ -34,6 +36,29 @@ public class TeamUserController {
     ) {
         teamUserService.removeUserFromEvent(userId, eventId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/partnerHackathons")
+    public ResponseEntity<List<TeamEventDTO>> getPartnerHackathonTeams() {
+        return ResponseEntity.ok(teamUserService.getAllPartnerHackathonTeams());
+    }
+
+    @PutMapping("/{teamId}/confirm")
+    public ResponseEntity<TeamEventDTO> confirmTeam(@PathVariable Integer teamId) {
+        Team team = teamUserService.confirmTeam(teamId);
+        return ResponseEntity.ok(teamUserService.convertToTeamEventDTO(team));
+    }
+
+    @PutMapping("/{teamId}/reject")
+    public ResponseEntity<TeamEventDTO> rejectTeam(@PathVariable Integer teamId) {
+        Team team = teamUserService.rejectTeam(teamId);
+        return ResponseEntity.ok(teamUserService.convertToTeamEventDTO(team));
+    }
+
+    @GetMapping("/getAllConfirmedPartnerHackathons")
+    public ResponseEntity<List<TeamEventDTO>> getConfirmedPartnerHackathons() {
+        List<TeamEventDTO> teams = teamUserService.getAllConfirmedPartnerHackathons();
+        return ResponseEntity.ok(teams);
     }
 
 

@@ -19,6 +19,7 @@ import ru.diplom.diplom.repositories.TeamUserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -72,6 +73,39 @@ public class TeamUserService {
             throw new RuntimeException("Смотреть на сайте партнера: " + event.getType());
         }
     }
+
+    public List<TeamEventDTO> getAllPartnerHackathonTeams() {
+        return teamUserRepository.findAllPartnerHackathonTeams()
+                .stream()
+                .map(this::convertToTeamEventDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public Team confirmTeam(Integer teamId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found with id: " + teamId));
+
+        team.setIsConfirmed(true);
+        return teamRepository.save(team);
+    }
+
+    @Transactional
+    public Team rejectTeam(Integer teamId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found with id: " + teamId));
+
+        team.setIsConfirmed(false);
+        return teamRepository.save(team);
+    }
+
+    public List<TeamEventDTO> getAllConfirmedPartnerHackathons() {
+        return teamUserRepository.findAllConfirmedPartnerHackathons()
+                .stream()
+                .map(this::convertToTeamEventDTO)
+                .collect(Collectors.toList());
+    }
+
 
 
 

@@ -85,4 +85,36 @@ public interface TeamUserRepository extends JpaRepository<TeamUser,Integer> {
         """, nativeQuery = true)
     void deleteTeamById(@Param("teamId") Integer teamId);
 
+    @Query(value = """
+    SELECT 
+        t.id,
+        t.name,
+        t.my_event_id,
+        t.place,
+        t.diploma,
+        t.is_confirmed
+
+        FROM team_my_user tmu
+        JOIN team t ON tmu.team_id = t.id
+        JOIN my_event e ON t.my_event_id = e.id
+        WHERE e.type = 'хакатон_от_партнера' AND t.is_confirmed IS NULL;
+        """, nativeQuery = true)
+    List<Team> findAllPartnerHackathonTeams();
+
+    @Query(value = """
+        SELECT 
+        t.id,
+        t.name,
+        t.my_event_id,
+        t.place,
+        t.diploma,
+        t.is_confirmed
+
+        FROM team_my_user tmu
+        JOIN team t ON tmu.team_id = t.id
+        JOIN my_event e ON t.my_event_id = e.id
+        WHERE e.type = 'хакатон_от_партнера' AND t.is_confirmed = true;
+    """, nativeQuery = true)
+    List<Team> findAllConfirmedPartnerHackathons();
+
 }
