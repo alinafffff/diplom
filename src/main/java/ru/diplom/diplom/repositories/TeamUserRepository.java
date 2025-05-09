@@ -124,4 +124,24 @@ public interface TeamUserRepository extends JpaRepository<TeamUser,Integer> {
 """, nativeQuery = true)
     List<User> findUsersByTeamId(@Param("teamId") Integer teamId);
 
+    @Query(value = """
+    SELECT DISTINCT t.* 
+    FROM team t
+    JOIN my_event e ON t.my_event_id = e.id
+    WHERE e.type = 'хакатон_от_партнера'
+    AND t.is_confirmed IS NULL
+    AND LOWER(t.name) LIKE LOWER(CONCAT('%', :query, '%'))
+""", nativeQuery = true)
+    List<Team> findUnconfirmedTeamsByName(@Param("query") String query);
+
+    @Query(value = """
+    SELECT DISTINCT t.* 
+    FROM team t
+    JOIN my_event e ON t.my_event_id = e.id
+    WHERE e.type = 'хакатон_от_партнера'
+    AND t.is_confirmed = true
+    AND LOWER(t.name) LIKE LOWER(CONCAT('%', :query, '%'))
+""", nativeQuery = true)
+    List<Team> findConfirmedTeamsByName(@Param("query") String query);
+
 }

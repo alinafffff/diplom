@@ -150,7 +150,19 @@ public class TeamUserService {
 
 
 
+    public List<TeamEventDTO> searchUnconfirmedTeams(String query) {
+        return teamUserRepository.findUnconfirmedTeamsByName(query)
+                .stream()
+                .map(this::convertToTeamEventDTO)
+                .collect(Collectors.toList());
+    }
 
+    public List<TeamEventDTO> searchConfirmedTeams(String query) {
+        return teamUserRepository.findConfirmedTeamsByName(query)
+                .stream()
+                .map(this::convertToTeamEventDTO)
+                .collect(Collectors.toList());
+    }
 
 
 

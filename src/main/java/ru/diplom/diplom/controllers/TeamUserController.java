@@ -61,5 +61,16 @@ public class TeamUserController {
         return ResponseEntity.ok(teams);
     }
 
+    @GetMapping("/searchTeamsByName")
+    public List<TeamEventDTO> searchUnconfirmedTeams(@RequestParam String query) {
+        return teamUserService.searchUnconfirmedTeams(query);
+    }
+
+    @GetMapping("/searchConfirmedTeamsByName")
+    public List<TeamEventDTO> searchConfirmedTeams(@RequestParam String query) {
+        return teamUserService.searchConfirmedTeams(query);
+    }
+
+
 
 }
