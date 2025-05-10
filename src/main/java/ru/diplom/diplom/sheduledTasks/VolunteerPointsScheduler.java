@@ -11,7 +11,6 @@ import ru.diplom.diplom.models.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class VolunteerPointsScheduler {
@@ -52,11 +51,9 @@ public class VolunteerPointsScheduler {
                     int newPoints = currentPoints + (event.getPoints() != null ? event.getPoints() : 0);
                     user.setPoints(newPoints);
                     userRepository.save(user);
-                    log.info("Пользователю {} начислено {} баллов за волонтерство", user.getLogin(), event.getPoints());
                 }
             }
 
-            log.info("Мероприятие \"{}\" обработано, баллы начислены", event.getName());
         }
     }
 
