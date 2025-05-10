@@ -255,7 +255,11 @@ public class EventService {
                     Boolean isRejected = event.getIsRejected();
                     LocalDateTime startDate = event.getStartDate();
 
-                    boolean dateCondition = startDate != null && startDate.isAfter(now);
+                    boolean isUpcoming = event.getStartDate().isAfter(now);
+                    boolean isOngoing = !event.getStartDate().isAfter(now) &&
+                            (event.getEndDate() == null || !event.getEndDate().isBefore(now));
+
+                    boolean dateCondition = isUpcoming || isOngoing;
                     boolean statusCondition = Boolean.FALSE.equals(isStudentCouncilRequest) ||
                             (Boolean.TRUE.equals(isStudentCouncilRequest) && Boolean.FALSE.equals(isRejected));
 
@@ -276,7 +280,7 @@ public class EventService {
                         date = event.getEndDate();
                     }
 
-                    boolean dateCondition = date != null && !date.isAfter(now);
+                    boolean dateCondition = date != null && date.isBefore(now);
                     boolean statusCondition = Boolean.FALSE.equals(isStudentCouncilRequest) ||
                             (Boolean.TRUE.equals(isStudentCouncilRequest) && Boolean.FALSE.equals(isRejected));
 
@@ -297,7 +301,11 @@ public class EventService {
                     Boolean isRejected = event.getIsRejected();
                     LocalDateTime startDate = event.getStartDate();
 
-                    boolean dateCondition = startDate != null && startDate.isAfter(now);
+                    boolean isUpcoming = event.getStartDate().isAfter(now);
+                    boolean isOngoing = !event.getStartDate().isAfter(now) &&
+                            (event.getEndDate() == null || !event.getEndDate().isBefore(now));
+
+                    boolean dateCondition = isUpcoming || isOngoing;
                     boolean statusCondition = Boolean.FALSE.equals(isStudentCouncilRequest) ||
                             (Boolean.TRUE.equals(isStudentCouncilRequest) &&
                                     Boolean.FALSE.equals(isRejected));
@@ -322,8 +330,9 @@ public class EventService {
                     if(event.getEndDate()!= null){
                         date = event.getEndDate();
                     }
+                    System.out.println("Сравниваем: " + date + " (мероприятие) vs " + now + " (сейчас)");
 
-                    boolean dateCondition = date != null && !date.isAfter(now);
+                    boolean dateCondition = date != null && date.isBefore(now);
                     boolean statusCondition = Boolean.FALSE.equals(isStudentCouncilRequest) ||
                             (Boolean.TRUE.equals(isStudentCouncilRequest) &&
                                     Boolean.FALSE.equals(isRejected));
@@ -342,7 +351,11 @@ public class EventService {
                     Boolean isRejected = event.getIsRejected();
                     LocalDateTime startDate = event.getStartDate();
 
-                    boolean dateCondition = startDate != null && startDate.isAfter(now);
+                    boolean isUpcoming = event.getStartDate().isAfter(now);
+                    boolean isOngoing = !event.getStartDate().isAfter(now) &&
+                            (event.getEndDate() == null || !event.getEndDate().isBefore(now));
+
+                    boolean dateCondition = isUpcoming || isOngoing;
                     boolean statusCondition = Boolean.TRUE.equals(isStudentCouncilRequest)
                             && Boolean.FALSE.equals(isRejected);
 
@@ -363,7 +376,7 @@ public class EventService {
                         date = event.getEndDate();
                     }
 
-                    boolean dateCondition = date != null && !date.isAfter(now);
+                    boolean dateCondition = date != null && date.isBefore(now);
                     boolean statusCondition = Boolean.TRUE.equals(isStudentCouncilRequest)
                             && Boolean.FALSE.equals(isRejected);
 
@@ -429,7 +442,7 @@ public class EventService {
                     if(event.getEndDate()!= null){
                         date = event.getEndDate();
                     }
-                    boolean dateCondition = date != null && !date.isAfter(now);
+                    boolean dateCondition = date != null && date.isBefore(now);
                     return dateCondition;
                 })
                 .map(this::convertToSpecificDTO)
@@ -449,7 +462,11 @@ public class EventService {
                     Boolean isRejected = event.getIsRejected();
                     LocalDateTime startDate = event.getStartDate();
 
-                    boolean dateCondition = startDate != null && startDate.isAfter(now);
+                    boolean isUpcoming = event.getStartDate().isAfter(now);
+                    boolean isOngoing = !event.getStartDate().isAfter(now) &&
+                            (event.getEndDate() == null || !event.getEndDate().isBefore(now));
+
+                    boolean dateCondition = isUpcoming || isOngoing;
                     boolean statusCondition;
                     boolean tmpCondition = Boolean.FALSE.equals(isStudentCouncilRequest)
                             || (Boolean.TRUE.equals(isStudentCouncilRequest)
@@ -496,7 +513,7 @@ public class EventService {
                         date = event.getEndDate();
                     }
 
-                    boolean dateCondition = date != null && !date.isAfter(now);
+                    boolean dateCondition = date != null && date.isBefore(now);
                     boolean statusCondition;
                     boolean tmpCondition = Boolean.FALSE.equals(isStudentCouncilRequest)
                             || (Boolean.TRUE.equals(isStudentCouncilRequest)
