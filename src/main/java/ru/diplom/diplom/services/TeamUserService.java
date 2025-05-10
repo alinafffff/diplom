@@ -148,6 +148,16 @@ public class TeamUserService {
         return teamRepository.save(team);
     }
 
+    public void updateTeams(List<TeamEventDTO> teamDtos) {
+        for (TeamEventDTO dto : teamDtos) {
+            Team team = teamRepository.findById(dto.getId())
+                    .orElseThrow(() -> new RuntimeException("Команда не найдена: " + dto.getId()));
+            team.setPlace(dto.getPlace());
+            team.setDiploma(dto.getDiploma());
+            teamRepository.save(team);
+        }
+    }
+
 
 
     public List<TeamEventDTO> searchUnconfirmedTeams(String query) {

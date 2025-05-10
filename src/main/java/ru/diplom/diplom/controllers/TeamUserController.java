@@ -1,6 +1,7 @@
 package ru.diplom.diplom.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.diplom.diplom.dto.TeamEventDTO;
@@ -69,6 +70,17 @@ public class TeamUserController {
     @GetMapping("/searchConfirmedTeamsByName")
     public List<TeamEventDTO> searchConfirmedTeams(@RequestParam String query) {
         return teamUserService.searchConfirmedTeams(query);
+    }
+
+    @PutMapping("/updateManyTeams")
+    public ResponseEntity<String> updateMany(@RequestBody List<TeamEventDTO> dtos) {
+        try {
+            teamUserService.updateTeams(dtos);
+            return ResponseEntity.ok("Команды успешно обновлены");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Ошибка при обновлении команд: " + e.getMessage());
+        }
     }
 
 

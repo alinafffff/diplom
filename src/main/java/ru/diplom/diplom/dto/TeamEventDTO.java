@@ -16,9 +16,10 @@ public class TeamEventDTO {
     private Integer eventId;
     private Boolean isConfirmed;
 
-    public String getPlace() {
-        return place == null ? "" : place.toString();
+    public Integer getPlace() {
+        return place == null ? null : Integer.valueOf(place);  // place — строка
     }
+
 
     public String getDiploma() {
         return diploma == null ? "" : diploma;
