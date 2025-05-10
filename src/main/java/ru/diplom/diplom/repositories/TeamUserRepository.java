@@ -51,8 +51,10 @@ public interface TeamUserRepository extends JpaRepository<TeamUser,Integer> {
     """, nativeQuery = true)
     List<User> findUsersByEventId(@Param("eventId") Integer eventId);
 
+
+
     @Query(value = """
-    SELECT t.*
+    SELECT DISTINCT t.*
     FROM team_my_user tmu
     JOIN my_user u ON tmu.my_user_id = u.id
     JOIN team t ON tmu.team_id = t.id

@@ -140,13 +140,11 @@ public class NewsService {
         Optional<User> u = userRepository.findById(userId);
         if(u.get().getRole().equals(5)) {
             news.setIsStudentCouncilRequest(true);
+            news.setIsRejected(null);
         }
 
-        if(!u.get().getRole().equals(5)){
-            savedNews = newsRepository.save(news);
-            notificationsService.createNewsNotification(news.getContent());
-        }
-        else throw new RuntimeException("Новость от студсовета сначала надо одобрить, только потом создавать!");
+        savedNews = newsRepository.save(news);
+        notificationsService.createNewsNotification(news.getContent());
 
         return convertToNewsDTO(savedNews);
     }
