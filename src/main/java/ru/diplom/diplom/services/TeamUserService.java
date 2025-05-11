@@ -118,6 +118,30 @@ public class TeamUserService {
         return convertToTeamEventDTO(savedTeam);
     }
 
+    @Transactional
+    public void closeHackathon(Integer eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+
+        List<Team> teams = teamRepository.findByMyEvent(eventId);
+
+        for (Team team : teams) {
+            awardPointsToTeamMembers(team);
+        }
+
+        LocalDateTime nowMinusOneHour = LocalDateTime.now().minusHours(1);
+
+        if (event.getEndDate() != null) {
+            event.setEndDate(nowMinusOneHour);
+        } else {
+            event.setStartDate(nowMinusOneHour);
+        }
+
+        eventRepository.save(event);
+    }
+
+
+
     private void awardPointsToTeamMembers(Team team) {
         Event event = eventRepository.findById(team.getMyEvent())
                 .orElseThrow(() -> new RuntimeException("Event not found"));

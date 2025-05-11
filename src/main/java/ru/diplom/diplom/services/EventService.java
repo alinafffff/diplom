@@ -269,6 +269,18 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
+    public Object getHackathonById(Integer eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+
+        if (event.getType() != EventType.хакатон && event.getType() != EventType.хакатон_от_партнера) {
+            throw new RuntimeException("Event is not a hackathon");
+        }
+
+        return convertToSpecificDTO(event);
+    }
+
+
     public List<?> getAllArchiveEventsWithTypeSpecificDTOs() {
         LocalDateTime now = LocalDateTime.now();
         return eventRepository.findAll().stream()

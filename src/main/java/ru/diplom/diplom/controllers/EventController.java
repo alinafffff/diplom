@@ -27,6 +27,12 @@ public class EventController {
         return eventService.getOne(id);
     }
 
+    @GetMapping("/getOne/{eventId}")
+    public ResponseEntity<Object> getHackathon(@PathVariable Integer eventId) {
+        return ResponseEntity.ok(eventService.getHackathonById(eventId));
+    }
+
+
     @PostMapping("/createVolunteering/{authorId}")
     public EventVolunteeringDTO createVolunteering(@PathVariable Integer authorId, @RequestBody EventVolunteeringDTO event) {
         return eventService.createVolunteeringEvent(authorId,event);

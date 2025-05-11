@@ -103,6 +103,11 @@ public class TeamUserController {
     }
 
 
+    @PostMapping("/events/{eventId}/close")
+    public ResponseEntity<String> closeHackathon(@PathVariable Integer eventId) {
+        teamUserService.closeHackathon(eventId);
+        return ResponseEntity.ok("Хакатон закрыт, баллы начислены.");
+    }
 
 
 
