@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface TeamRepository extends JpaRepository<Team,Integer> {
     List<Team> findAllByMyEvent(Integer eventId);
+    List<Team> findByNameContainingIgnoreCaseAndMyEvent(String name, Integer eventId);
+
 }

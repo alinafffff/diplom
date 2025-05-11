@@ -42,6 +42,7 @@ public class TeamUserService {
                 .toList();
     }
 
+
     @Transactional
     public void removeUserFromEvent(Integer userId, Integer eventId) {
         teamUserRepository.deleteByUserIdAndEventId(userId, eventId);
@@ -51,6 +52,13 @@ public class TeamUserService {
             teamUserRepository.deleteTeamById(teamId);
         }
     }
+
+    @Transactional
+    public void removeTeamFromEvent(Integer teamId, Integer eventId) {
+        teamUserRepository.deleteUsersFromTeam(teamId);
+        teamUserRepository.deleteTeamById(teamId);
+    }
+
 
 
     public List<?> getUsersByEventId(Integer eventId) {
@@ -173,6 +181,15 @@ public class TeamUserService {
                 .map(this::convertToTeamEventDTO)
                 .collect(Collectors.toList());
     }
+
+    public List<TeamEventDTO> searchTeamsByNameAndEvent(String name, Integer eventId) {
+        List<Team> teams = teamRepository.findByNameContainingIgnoreCaseAndMyEvent(name, eventId);
+        return teams.stream()
+                .map(this::convertToTeamEventDTO)
+                .collect(Collectors.toList());
+    }
+
+
 
 
 

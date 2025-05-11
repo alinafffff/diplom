@@ -39,6 +39,16 @@ public class TeamUserController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/removeTeamFromEvent/{eventId}/team/{teamId}")
+    public ResponseEntity<Void> removeTeamFromEvent(
+            @PathVariable Integer eventId,
+            @PathVariable Integer teamId
+    ) {
+        teamUserService.removeTeamFromEvent(teamId, eventId);
+        return ResponseEntity.noContent().build();
+    }
+
+
     @GetMapping("/partnerHackathons")
     public ResponseEntity<List<TeamEventDTO>> getPartnerHackathonTeams() {
         return ResponseEntity.ok(teamUserService.getAllPartnerHackathonTeams());
@@ -82,6 +92,17 @@ public class TeamUserController {
                     .body("Ошибка при обновлении команд: " + e.getMessage());
         }
     }
+
+    @GetMapping("/teams/search")
+    public ResponseEntity<List<TeamEventDTO>> searchTeams(
+            @RequestParam String name,
+            @RequestParam Integer eventId
+    ) {
+        List<TeamEventDTO> result = teamUserService.searchTeamsByNameAndEvent(name, eventId);
+        return ResponseEntity.ok(result);
+    }
+
+
 
 
 

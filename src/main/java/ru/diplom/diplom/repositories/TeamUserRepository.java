@@ -146,4 +146,10 @@ public interface TeamUserRepository extends JpaRepository<TeamUser,Integer> {
 """, nativeQuery = true)
     List<Team> findConfirmedTeamsByName(@Param("query") String query);
 
+    @Modifying
+    @Query(value = """
+    DELETE FROM team_my_user WHERE team_id = :teamId
+    """, nativeQuery = true)
+    void deleteUsersFromTeam(@Param("teamId") Integer teamId);
+
 }
