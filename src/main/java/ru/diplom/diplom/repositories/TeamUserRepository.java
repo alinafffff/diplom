@@ -146,4 +146,6 @@ public interface TeamUserRepository extends JpaRepository<TeamUser,Integer> {
 """, nativeQuery = true)
     List<Team> findConfirmedTeamsByName(@Param("query") String query);
 
+    @Query("select t from TeamUser t where t.user = ?1")
+    List<TeamUser> findAllByUser(Integer user);
 }

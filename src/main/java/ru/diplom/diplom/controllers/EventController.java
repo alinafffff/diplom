@@ -100,6 +100,7 @@ public class EventController {
     public List<?> getAllStudsovetEvents() {
         return eventService.getStudentCouncilRequestEvents();
     }
+
     @GetMapping("/allStudsovetArchivedEvents")
     public List<?> getAllStudsovetArchivedEvents() {
         return eventService.getStudentCouncilRequestArchivedEvents();
@@ -108,6 +109,12 @@ public class EventController {
     @GetMapping("/findById/{myId}")
     public List<?> getAllMyEvents(@PathVariable Integer myId) {
         return eventService.getAMyEvents(myId);
+    }
+
+    @GetMapping("/findByIdAndType/{myId}")
+    public List<?> getAllMyEvents(@PathVariable Integer myId, @RequestParam List<String> types) {
+        var res = eventService.getEventsByUserIdAndTypes(myId, types);
+        return res;
     }
 
     @GetMapping("/findAllStudsovetEventsRequests")
