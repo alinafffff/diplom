@@ -29,7 +29,6 @@ public class EventService {
     private final NewsService newsService;
     @Autowired
     private final TeamUserRepository teamUserRepository;
-    private final TeamRepository teamRepository;
 
     public void deleteById(int id) {
         eventRepository.deleteById(id);
@@ -387,20 +386,6 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
-    public List<?> getEventsByUserIdAndTypes(Integer userId, List<String> types) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(()-> new RuntimeException("Юзер не надйен"));
-        List<TeamUser> teamUserList = teamUserRepository.findAllByUser(user.getId());
-        teamUserList.forEach(e -> System.out.println(e.getId()));
-        List<Team> teams = teamRepository.findAllById(teamUserList.stream().map(TeamUser::getTeam).toList());
-        teams.forEach(e -> System.out.println(e.getId()));
-        List<Event> events = eventRepository.findAllById(teams.stream().map(Team::getMyEvent).toList())
-                .stream()
-                .filter(e->types.contains(e.getType().getName()))
-                .toList();
-        events.forEach(e -> System.out.println(e.getId()));
-        return events.stream().map(this::convertToSpecificDTO).toList();
-    }
 
     public List<?> getAMyEvents(Integer myId) {
         LocalDateTime now = LocalDateTime.now();

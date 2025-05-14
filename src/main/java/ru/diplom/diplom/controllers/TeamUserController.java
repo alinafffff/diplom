@@ -83,41 +83,6 @@ public class TeamUserController {
         }
     }
 
-    @PostMapping("/createTeam/{eventId}/creator/{userId}")
-    public ResponseEntity<TeamEventDTO> createTeam(
-            @PathVariable Integer eventId,
-            @PathVariable Integer userId,
-            @RequestBody String teamName) {
-
-        TeamEventDTO team = teamUserService.createTeam(teamName, eventId, userId);
-        return ResponseEntity.ok(team);
-    }
-
-    @PutMapping("/joinTeam/{teamId}/user/{userId}")
-    public ResponseEntity<String> joinTeam(
-            @PathVariable Integer teamId,
-            @PathVariable Integer userId) {
-
-        boolean success = teamUserService.joinTeam(teamId, userId);
-        if (success) {
-            return ResponseEntity.ok("Успешно присоединился к команде");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Не удалось присоединиться к команде (возможно, команда полна или не существует)");
-        }
-    }
-
-    @PutMapping("/distributePoints/{eventId}")
-    public ResponseEntity<String> distributePoints(@PathVariable Integer eventId) {
-        try {
-            teamUserService.distributePointsToAllParticipants(eventId);
-            return ResponseEntity.ok("Баллы успешно начислены участникам");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Ошибка при начислении баллов: " + e.getMessage());
-        }
-    }
-
 
 
 }

@@ -1,13 +1,10 @@
 package ru.diplom.diplom.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.diplom.diplom.dto.*;
 import ru.diplom.diplom.models.User;
-import ru.diplom.diplom.repositories.RoleRepository;
-import ru.diplom.diplom.repositories.UserRepository;
 import ru.diplom.diplom.services.ProfileService;
 import ru.diplom.diplom.services.UserService;
 
@@ -21,12 +18,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @GetMapping("/all")
     public List<UserAdminDTO> getAllUsers() {
@@ -160,39 +151,4 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    @PostMapping("/registerStudent")
-    public ResponseEntity<Integer> registerStudent(@RequestBody StudentRegisterDTO dto) {
-        User user = new User();
-        user.setName(dto.getName());
-        user.setSurname(dto.getSurname());
-        user.setPatronymic(dto.getPatronymic());
-        user.setEmail(dto.getEmail());
-        user.setPhone(dto.getPhone());
-        user.setLogin(dto.getLogin());
-//        user.setPassword(passwordEncoder.encode(dto.getPassword())); // обязательно хэш
-        user.setPassword(dto.getPassword());
-        user.setGroup(dto.getGroupId()); // может быть null
-        user.setRole(4); // Роль должна быть в БД
-
-        userRepository.save(user);
-        return ResponseEntity.ok(user.getId());
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginStudentsDTO request) {
-        User user = userRepository.findByLogin(request.getLogin());
-
-        if (user == null || !user.getPassword().equals(request.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверный логин или пароль");
-        }
-
-        UserProfileDTO studentData = userService.getStudentByUserId(user.getId());
-        return ResponseEntity.ok(studentData);
-    }
-
-    @GetMapping("/student/{userId}")
-    public ResponseEntity<UserProfileDTO> getStudentData(@PathVariable Integer userId) {
-        UserProfileDTO student = userService.getStudentByUserId(userId);
-        return ResponseEntity.ok(student);
-    }
 }

@@ -4,7 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import ru.diplom.diplom.dto.GroupDTO;
 import ru.diplom.diplom.models.Group;
 
 import java.util.List;
@@ -42,11 +41,6 @@ public interface GroupRepository extends JpaRepository<Group,Integer> {
 
     List<Group> findByCurator(Integer curator_id);
 
-    @Query(value = """
-    SELECT *
-    FROM my_group
-    """, nativeQuery = true)
-    List<Group> getAllGroups();
 
 
 }

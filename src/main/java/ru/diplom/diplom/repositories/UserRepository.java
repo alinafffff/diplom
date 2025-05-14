@@ -44,6 +44,5 @@ public interface UserRepository extends JpaRepository<User,Integer> {
     """)
     List<User> searchStudentsByFullName(@Param("query") String query);
 
-    User findByLogin(@Param("login") String login);
 
 }

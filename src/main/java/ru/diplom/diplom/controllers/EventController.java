@@ -110,12 +110,6 @@ public class EventController {
         return eventService.getAMyEvents(myId);
     }
 
-    @GetMapping("/findByIdAndType/{myId}")
-    public List<?> getAllMyEvents(@PathVariable Integer myId, @RequestParam List<String> types) {
-        var res = eventService.getEventsByUserIdAndTypes(myId, types);
-        return res;
-    }
-
     @GetMapping("/findAllStudsovetEventsRequests")
     public List<?> getAllStudsovetEventsRequests() {
         return eventService.getEventStudsovetRequests();

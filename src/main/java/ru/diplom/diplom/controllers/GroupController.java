@@ -105,9 +105,4 @@ public class GroupController {
         return ResponseEntity.ok("Группа успешно обновлена");
     }
 
-    @GetMapping("/allGroups")
-    public List<GroupDTO> getAllGroupsAbbreviation() {
-        return groupService.getAllGroups();
-    }
-
 }

@@ -415,11 +415,4 @@ public class GroupService {
         return LocalDate.now().isAfter(endOfStudies);
     }
 
-    public List<GroupDTO> getAllGroups() {
-        return groupRepository.getAllGroups()
-                .stream()
-                .map(this::convertToGroupDTO)
-                .toList();
-    }
-
 }
