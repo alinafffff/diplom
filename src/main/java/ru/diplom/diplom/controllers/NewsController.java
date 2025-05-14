@@ -83,11 +83,6 @@ public class NewsController {
         News updated = newsService.updateNews(newsId, updatedNews);
         return ResponseEntity.ok(updated);
     }
-    @PutMapping("/mobile/update/{newsId}")
-    public ResponseEntity<News> mobileUpdateNews(@PathVariable Integer newsId, @RequestBody NewsDTO updatedNews) {
-        News updated = newsService.mobileUpdateNews(newsId, updatedNews);
-        return ResponseEntity.ok(updated);
-    }
 
     @GetMapping("/allSudsovetRequests")
     public List<NewsDTO> getAllStudsovetRequests() {
