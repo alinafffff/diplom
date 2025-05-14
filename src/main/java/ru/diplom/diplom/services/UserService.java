@@ -72,8 +72,11 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void createUser(UserUpdateCreateDTO dto) {
+    public void createUser(UserCreateDTO dto) {
         User user = new User();
+        user.setName(dto.getName());
+        user.setSurname(dto.getSurname());
+        user.setPatronymic(dto.getPatronymic());
         user.setLogin(dto.getLogin());
         user.setEmail(dto.getEmail());
 
@@ -271,6 +274,7 @@ public class UserService {
                 .email(user.getEmail())
                 .points(user.getPoints())
                 .groupId(groupId)
+                .photoUrl(user.getPhotoUrl())
                 .build();
     }
 

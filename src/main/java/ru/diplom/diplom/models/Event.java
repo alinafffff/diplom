@@ -69,6 +69,8 @@ public class Event {
 
     @Column(name = "is_rejected")
     private Boolean isRejected;
+    @Column(name = "registration_link")
+    private String registrationLink;
 }
 
 

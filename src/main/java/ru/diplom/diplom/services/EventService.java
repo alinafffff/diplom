@@ -198,6 +198,7 @@ public class EventService {
                 .pointsParticipation(dto.getPointsParticipation())
                 .photoUrl(dto.getPhotoUrl())
                 .isStudentCouncilRequest(false)
+                .registrationLink(dto.getRegistrationLink())
                 .build();
 
         Event savedEvent = eventRepository.save(event);
@@ -239,6 +240,9 @@ public class EventService {
         }
         if (dto.getPhotoUrl() != null) {
             existingEvent.setPhotoUrl(dto.getPhotoUrl());
+        }
+        if (dto.getRegistrationLink() != null) {
+            existingEvent.setRegistrationLink(dto.getRegistrationLink());
         }
 
         Event updatedEvent = eventRepository.save(existingEvent);
@@ -754,7 +758,8 @@ public class EventService {
                 e.getPointsParticipation(),
                 e.getPhotoUrl(),
                 e.getIsStudentCouncilRequest(),
-                e.getIsRejected());
+                e.getIsRejected(),
+                e.getRegistrationLink());
     }
 
     private NewsDTO convertToNewsDTO(News news){

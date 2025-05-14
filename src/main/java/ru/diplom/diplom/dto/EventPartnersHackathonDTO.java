@@ -27,5 +27,6 @@ public class EventPartnersHackathonDTO {
     private String photoUrl;
     private Boolean isStudentCouncilRequest = false;
     private Boolean isRejected;
+    private String registrationLink;
 
 }

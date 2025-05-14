@@ -34,7 +34,8 @@ public interface TeamUserRepository extends JpaRepository<TeamUser,Integer> {
                 e.max_participants,
                 e.max_team_size,
                 e.is_student_council_request,
-                e.is_rejected
+                e.is_rejected,
+                e.registration_link
                 FROM team_my_user tmu
                 JOIN team t ON tmu.team_id = t.id
                 JOIN my_event e ON t.my_event_id = e.id

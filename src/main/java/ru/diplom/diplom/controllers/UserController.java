@@ -50,7 +50,7 @@ public class UserController {
     }
 
     @PostMapping("/createUser")
-    public ResponseEntity<String> createUser(@RequestBody UserUpdateCreateDTO request) {
+    public ResponseEntity<String> createUser(@RequestBody UserCreateDTO request) {
         userService.createUser(request);
         return ResponseEntity.ok("Пользователь успешно создан");
     }
