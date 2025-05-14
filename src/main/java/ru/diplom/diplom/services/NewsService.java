@@ -140,7 +140,7 @@ public class NewsService {
         Optional<User> u = userRepository.findById(userId);
         if(u.get().getRole().equals(5)) {
             news.setIsStudentCouncilRequest(true);
-            news.setIsRejected(null);
+            news.setIsRejected(false);
         }
 
         savedNews = newsRepository.save(news);
@@ -189,6 +189,17 @@ public class NewsService {
                     if (updatedNews.getContent() != null) existingNews.setContent(updatedNews.getContent());
                     existingNews.setPhotoUrl(updatedNews.getPhotoUrl());
                     if (updatedNews.getMyGroup() != null) existingNews.setMyGroup(updatedNews.getMyGroup());
+
+                    return newsRepository.save(existingNews);
+                })
+                .orElseThrow(() -> new EntityNotFoundException("Новость с id " + id + " не найдена"));
+    }
+
+    public News mobileUpdateNews(Integer id, NewsDTO updatedNews) {
+        return newsRepository.findById(id)
+                .map(existingNews -> {
+                    if (updatedNews.getDescription() != null) existingNews.setContent(updatedNews.getDescription());
+                    if (updatedNews.getPhotoUrl() != null)existingNews.setPhotoUrl(updatedNews.getPhotoUrl());
 
                     return newsRepository.save(existingNews);
                 })

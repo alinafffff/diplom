@@ -8,11 +8,9 @@ import org.springframework.stereotype.Service;
 import ru.diplom.diplom.dto.*;
 import ru.diplom.diplom.models.*;
 import ru.diplom.diplom.models.Role;
-import ru.diplom.diplom.repositories.EventRepository;
-import ru.diplom.diplom.repositories.GroupRepository;
-import ru.diplom.diplom.repositories.RoleRepository;
-import ru.diplom.diplom.repositories.UserRepository;
+import ru.diplom.diplom.repositories.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,6 +25,14 @@ public class UserService {
     private final EventRepository eventRepository;
     @Autowired
     private GroupService groupService;
+
+    private final ProfileRepository profileRepository;
+
+    private final DirectionRepository directionRepository;
+
+    private final FormRepository formRepository;
+
+    private final LevelRepository levelRepository;
 
     public User findUserById(Integer id){
         return userRepository.findById(id)
@@ -293,4 +299,87 @@ public class UserService {
         String roleName = roleRepository.findById(user.getRole()).map(Role::getName).orElse("Неизвестная роль");
         return new UserUpdateCreateDTO(user.getId(), user.getLogin(),user.getEmail(), roleName);
     }
+
+    private int calculateCourse(LocalDate startDate) {
+        if (startDate == null) return 0;
+
+        LocalDate now = LocalDate.now();
+        int course = now.getYear() - startDate.getYear();
+        if (now.getMonthValue() < 9) {
+            course -= 1;
+        }
+        return Math.max(course + 1, 1);
+    }
+
+    private boolean isArchived(LocalDate startDate, int duration) {
+        LocalDate endOfStudies = startDate.plusYears(duration).withMonth(8).withDayOfMonth(31);
+        return LocalDate.now().isAfter(endOfStudies);
+    }
+
+    public GroupDTO convertToGroupDTO(Group g) {
+        String directionAbbreviation;
+        String n;
+
+        if (g.getProfile() != null) {
+            directionAbbreviation = profileRepository.findById(g.getProfile())
+                    .flatMap(p -> directionRepository.findById(p.getDirection()))
+                    .map(Direction::getAbbreviation)
+                    .orElse("Not found direction from profile");
+        } else {
+            directionAbbreviation = directionRepository.findById(g.getDirection())
+                    .map(Direction::getAbbreviation)
+                    .orElse("Not found");
+        }
+
+        String formName = formRepository.findById(g.getForm())
+                .map(Form::getAbbreviation)
+                .orElse("");
+
+        String levelName = levelRepository.findById(g.getMyLevel())
+                .map(Level::getAbbreviation)
+                .orElse("");
+
+        Integer profileNumber = null;
+        if (g.getProfile() != null) {
+            profileNumber = profileRepository.findById(g.getProfile())
+                    .map(Profile::getNumber)
+                    .orElse(null);
+        }
+
+        int course = calculateCourse(g.getStartDate());
+        boolean archived = isArchived(g.getStartDate(), g.getDuration());
+
+        if (profileNumber == null){
+            n = levelName+"-"+directionAbbreviation+formName+"-"+course+g.getNumber();
+        }
+        else n = levelName+profileNumber+"-"+directionAbbreviation+formName+"-"+course+g.getNumber();
+
+        return GroupDTO.builder()
+                .id(g.getId())
+                .name(n)
+                .build();
+    }
+
+
+    public UserProfileDTO getStudentByUserId(Integer userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        Group group = null;
+        if (user.getGroup() != null) {
+            group = groupRepository.findById(user.getGroup()).orElse(null);
+        }
+
+        return UserProfileDTO.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .surname(user.getSurname())
+                .patronymic(user.getPatronymic())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .points(user.getPoints())
+                .groupId(group != null ? group.getId() : null)
+                .groupName(group != null ? String.valueOf(this.convertToGroupDTO(group)) : null)
+                .build();
+    }
+
 }
