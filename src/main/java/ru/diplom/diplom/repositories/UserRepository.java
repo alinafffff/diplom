@@ -44,5 +44,8 @@ public interface UserRepository extends JpaRepository<User,Integer> {
     """)
     List<User> searchStudentsByFullName(@Param("query") String query);
 
+    User findByLogin(@Param("login") String login);
 
+    @Query("select u from User u join TeamUser tu on tu.user = u.id where tu.team = ?1")
+    List<User> findTeamMembersIdByTeamId(Integer teamId);
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import ru.diplom.diplom.models.Group;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface GroupRepository extends JpaRepository<Group,Integer> {
@@ -41,6 +42,13 @@ public interface GroupRepository extends JpaRepository<Group,Integer> {
 
     List<Group> findByCurator(Integer curator_id);
 
+    @Query(value = """
+    SELECT *
+    FROM my_group
+    """, nativeQuery = true)
+    List<Group> getAllGroups();
 
+    @Query("select g from Group g join User u on u.group = g.id")
+    Optional<Group> findByMemberId(Integer integer);
 
 }

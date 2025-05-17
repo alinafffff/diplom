@@ -153,4 +153,20 @@ public interface TeamUserRepository extends JpaRepository<TeamUser,Integer> {
     """, nativeQuery = true)
     void deleteUsersFromTeam(@Param("teamId") Integer teamId);
 
+    @Query("select t from TeamUser t where t.user = ?1")
+    List<TeamUser> findAllByUser(Integer user);
+
+
+    @Query(value = """
+            SELECT CASE WHEN COUNT(tu) > 0 THEN true ELSE false END
+            FROM TeamUser tu WHERE tu.team = :teamId AND tu.user = :userId
+            """)
+    boolean existsByTeamIdAndUserId(@Param("teamId") Integer teamId, @Param("userId") Integer userId);
+
+    @Query("SELECT COUNT(tu) FROM TeamUser tu WHERE tu.team = :teamId")
+    int countByTeamId(@Param("teamId") Integer teamId);
+
+    @Query("SELECT tu FROM TeamUser tu WHERE tu.team = :teamId")
+    List<TeamUser> findAllByTeamId(@Param("teamId") Integer teamId);
+
 }

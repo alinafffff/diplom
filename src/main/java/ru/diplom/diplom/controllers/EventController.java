@@ -172,5 +172,18 @@ public class EventController {
             return ResponseEntity.notFound().build();
         }
     }
+    @GetMapping("/findByIdAndType/{myId}")
+    public List<?> getAllMyEvents(@PathVariable Integer myId, @RequestParam List<String> types) {
+        var res = eventService.getEventsByUserIdAndTypes(myId, types);
+        return res;
+    }
+
+    @PutMapping("/updateMobileVolunteering/{eventId}")
+    public ResponseEntity<EventVolunteeringDTO> updateMobileVolunteering(
+            @PathVariable Integer eventId,
+            @RequestBody EventVolunteeringDTO dto) {
+        EventVolunteeringDTO updatedEvent = eventService.updateMobileVolunteeringEvent(eventId, dto);
+        return ResponseEntity.ok(updatedEvent);
+    }
 
 }

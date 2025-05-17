@@ -30,6 +30,8 @@ public class EventService {
     @Autowired
     private final TeamUserRepository teamUserRepository;
 
+    private final TeamRepository teamRepository;
+
     public void deleteById(int id) {
         eventRepository.deleteById(id);
     }
@@ -778,5 +780,59 @@ public class EventService {
                 .description(news.getContent())
                 .photoUrl(news.getPhotoUrl())
                 .build();
+    }
+
+    public List<?> getEventsByUserIdAndTypes(Integer userId, List<String> types) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new RuntimeException("Юзер не надйен"));
+        List<TeamUser> teamUserList = teamUserRepository.findAllByUser(user.getId());
+        teamUserList.forEach(e -> System.out.println(e.getId()));
+        List<Team> teams = teamRepository.findAllById(teamUserList.stream().map(TeamUser::getTeam).toList());
+        teams.forEach(e -> System.out.println(e.getId()));
+        List<Event> events = eventRepository.findAllById(teams.stream().map(Team::getMyEvent).toList())
+                .stream()
+                .filter(e->types.contains(e.getType().getName()))
+                .toList();
+        events.forEach(e -> System.out.println(e.getId()));
+        return events.stream().map(this::convertToSpecificDTO).toList();
+    }
+
+    @Transactional
+    public EventVolunteeringDTO updateMobileVolunteeringEvent(Integer eventId, EventVolunteeringDTO dto) {
+        Event existingEvent = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Мероприятие не найдено"));
+
+        if (!EventType.волонтерство.equals(existingEvent.getType())) {
+            throw new RuntimeException("Можно обновлять только волонтерские мероприятия");
+        }
+
+        if (dto.getName() != null) {
+            existingEvent.setName(dto.getName());
+        }
+        if (dto.getDescription() != null) {
+            existingEvent.setDescription(dto.getDescription());
+        }
+        if (dto.getStartDate() != null) {
+            existingEvent.setStartDate(dto.getStartDate());
+        }
+        if (dto.getEndDate() != null) {
+            existingEvent.setEndDate(dto.getEndDate());
+        }
+        if (dto.getPoints() != null) {
+            existingEvent.setPoints(dto.getPoints());
+        }
+        if (dto.getPhotoUrl() != null) {
+            existingEvent.setPhotoUrl(dto.getPhotoUrl());
+        }
+        if (dto.getPhotoUrl() == null) {
+            existingEvent.setPhotoUrl(null);
+        }
+        if (dto.getMaxParticipants() != null) {
+            existingEvent.setMaxParticipants(dto.getMaxParticipants());
+        }
+
+        Event updatedEvent = eventRepository.save(existingEvent);
+        System.out.println(existingEvent.getPhotoUrl());
+        return convertToVolunteeringDTO(updatedEvent);
     }
 }

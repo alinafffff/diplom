@@ -4,13 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.diplom.diplom.dto.TeamEventDTO;
-import ru.diplom.diplom.dto.UserEventShortDTO;
-import ru.diplom.diplom.dto.UserGroupDTO;
-import ru.diplom.diplom.models.Event;
-import ru.diplom.diplom.models.Group;
-import ru.diplom.diplom.models.Team;
-import ru.diplom.diplom.models.User;
+import ru.diplom.diplom.dto.*;
+import ru.diplom.diplom.models.*;
 import ru.diplom.diplom.repositories.*;
 
 import java.time.LocalDateTime;
@@ -28,6 +23,7 @@ public class TeamUserService {
     private final GroupRepository groupRepository;
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     public List<UserEventShortDTO> getEventsByStudentId(Integer studentId) {
         LocalDateTime now = LocalDateTime.now();
@@ -58,7 +54,6 @@ public class TeamUserService {
         teamUserRepository.deleteUsersFromTeam(teamId);
         teamUserRepository.deleteTeamById(teamId);
     }
-
 
 
     public List<?> getUsersByEventId(Integer eventId) {
@@ -141,7 +136,6 @@ public class TeamUserService {
     }
 
 
-
     private void awardPointsToTeamMembers(Team team) {
         Event event = eventRepository.findById(team.getMyEvent())
                 .orElseThrow(() -> new RuntimeException("Event not found"));
@@ -164,10 +158,14 @@ public class TeamUserService {
         }
 
         switch (place) {
-            case 1: return event.getPoints1st();
-            case 2: return event.getPoints2nd();
-            case 3: return event.getPoints3rd();
-            default: return event.getPointsParticipation();
+            case 1:
+                return event.getPoints1st();
+            case 2:
+                return event.getPoints2nd();
+            case 3:
+                return event.getPoints3rd();
+            default:
+                return event.getPointsParticipation();
         }
     }
 
@@ -191,7 +189,6 @@ public class TeamUserService {
     }
 
 
-
     public List<TeamEventDTO> searchUnconfirmedTeams(String query) {
         return teamUserRepository.findUnconfirmedTeamsByName(query)
                 .stream()
@@ -212,10 +209,6 @@ public class TeamUserService {
                 .map(this::convertToTeamEventDTO)
                 .collect(Collectors.toList());
     }
-
-
-
-
 
 
     public UserEventShortDTO convertToUserEventShortDTO(Event event) {
@@ -263,5 +256,170 @@ public class TeamUserService {
                 .groupName(groupName)
                 .groupId(groupId)
                 .build();
+    }
+
+    @Transactional
+    public TeamEventDTO createTeamForOne(Integer eventId, Integer userId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Мероприятие не найдено"));
+        // Создание новой команды
+        Team team = new Team();
+        team.setName(String.valueOf(userRepository.findById(userId).orElseThrow().getName()));
+        team.setMyEvent(eventId);
+        team.setIsConfirmed(true); // или true, если не требуется подтверждение
+        team = teamRepository.save(team);
+        // Добавление первого участника
+        TeamUser teamUser = new TeamUser();
+        teamUser.setUser(userId);
+        teamUser.setTeam(team.getId());
+        teamUserRepository.save(teamUser);
+        return convertToTeamEventDTO(team);
+    }
+
+    @Transactional
+    public TeamEventDTO createTeam(Integer eventId, Integer userId, String teamName) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Мероприятие не найдено"));
+        // Создание новой команды
+        Team team = new Team();
+        team.setName(teamName);
+        team.setMyEvent(eventId);
+        team.setIsConfirmed(true); // или true, если не требуется подтверждение
+        team = teamRepository.save(team);
+        // Добавление первого участника
+        TeamUser teamUser = new TeamUser();
+        teamUser.setUser(userId);
+        teamUser.setTeam(team.getId());
+        teamUserRepository.save(teamUser);
+        return convertToTeamEventDTO(team);
+    }
+
+    public boolean joinTeam(Integer teamId, Integer userId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Команда не найдена"));
+
+        // Проверка — не в другой ли команде уже этот пользователь на этом мероприятии
+        List<Team> allTeams = teamRepository.findAllByMyEvent(team.getMyEvent());
+        for (Team t : allTeams) {
+            if (teamUserRepository.existsByTeamIdAndUserId(t.getId(), userId)) {
+                return false; // пользователь уже в другой команде на этом мероприятии
+            }
+        }
+
+        // Проверка — не превышен ли лимит участников
+        int currentSize = teamUserRepository.countByTeamId(teamId);
+        Event event = eventRepository.findById(team.getMyEvent())
+                .orElseThrow(() -> new RuntimeException("Мероприятие не найдено"));
+
+        if (currentSize >= event.getMaxTeamSize()) {
+            return false; // команда уже полная
+        }
+
+        // Добавляем участника
+        TeamUser teamUser = new TeamUser();
+        teamUser.setTeam(teamId);
+        teamUser.setUser(userId);
+        teamUserRepository.save(teamUser);
+        return true;
+    }
+
+    public void distributePointsToAllParticipants(Integer eventId) {
+        EventHackathonDTO event = convertToHackathonDTO(eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Мероприятие не найдено")));
+
+        List<Team> teams = teamRepository.findAllByMyEvent(eventId);
+
+        for (Team team : teams) {
+            Integer place = team.getPlace(); // 1, 2, 3 или null
+            Integer pointsToGive;
+
+            if (place != null) {
+                switch (place) {
+                    case 1 -> pointsToGive = event.getPoints1st();
+                    case 2 -> pointsToGive = event.getPoints2nd();
+                    case 3 -> pointsToGive = event.getPoints3rd();
+                    default -> pointsToGive = event.getPointsParticipation();
+                }
+            } else {
+                pointsToGive = event.getPointsParticipation();
+            }
+
+            List<User> participants = teamUserRepository.findUsersByTeamId(team.getId());
+
+            for (User u : participants) {
+                User user = userRepository.findById(u.getId())
+                        .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+                user.setPoints(user.getPoints() + pointsToGive); // или updateScore(userId, pointsToGive)
+                userRepository.save(user);
+            }
+        }
+    }
+
+    private EventHackathonDTO convertToHackathonDTO(Event e) {
+        User author = null;
+
+        if (e.getCreatedBy() != null) {
+            author = userRepository.findById(e.getCreatedBy()).orElse(null);
+        }
+
+        String authorFullName = (author != null)
+                ? author.getSurname() + " " + author.getName() + " " + author.getPatronymic()
+                : null;
+
+        return new EventHackathonDTO(
+                e.getId(),
+                e.getName(),
+                e.getDescription(),
+                e.getStartDate(),
+                e.getEndDate(),
+                e.getType(),
+                authorFullName,
+                e.getPoints1st(),
+                e.getPoints2nd(),
+                e.getPoints3rd(),
+                e.getPointsParticipation(),
+                e.getPhotoUrl(),
+                e.getMaxParticipants(),
+                e.getMaxTeamSize(),
+                e.getIsStudentCouncilRequest(),
+                e.getIsRejected());
+    }
+
+
+    public TeamDTO getTeammatesFromEventAndUserId(Integer userId, Integer eventId) {
+        Integer teamId = teamRepository.findIdByEventIdAndMemberId(userId, eventId).orElseThrow();
+        String teamName = teamRepository.getNameById(teamId);
+        Integer groupId = userRepository.findById(userId).orElseThrow().getGroup();
+        List<TeamMateDTO> members = userRepository.findTeamMembersIdByTeamId(teamId)
+                .stream()
+                .map(user -> new TeamMateDTO(user.getId(),
+                        user.getSurname(),
+                        user.getName(),
+                        user.getPatronymic(),
+                        userService.convertToGroupDTO(groupRepository.findByMemberId(user.getId())
+                                        .orElseThrow())
+                                .getName()))
+                .toList();
+        return new TeamDTO(teamId, teamName, members);
+    }
+
+    public TeamEventDTO getTeamForAch(Integer userId, Integer eventId) {
+        Integer teamId = teamRepository.findIdByEventIdAndMemberId(userId, eventId).orElseThrow();
+        String teamName = teamRepository.getNameById(teamId);
+        Integer place = teamRepository.findById(teamId).orElseThrow().getPlace();
+        String diploma = teamRepository.findById(teamId).orElseThrow().getDiploma();
+        Integer groupId = userRepository.findById(userId).orElseThrow().getGroup();
+        boolean bool = teamRepository.findById(teamId).orElseThrow().getIsConfirmed();
+        return new TeamEventDTO(teamId, teamName,"", place, diploma, eventId, bool);
+    }
+
+    public void updateTeam(TeamUpdateDTO dto) {
+
+            Team team = teamRepository.findById(dto.getId())
+                    .orElseThrow(() -> new RuntimeException("Команда не найдена: " + dto.getId()));
+            team.setPlace(dto.getPlace());
+            team.setDiploma(dto.getDiploma());
+            teamRepository.save(team);
+
     }
 }

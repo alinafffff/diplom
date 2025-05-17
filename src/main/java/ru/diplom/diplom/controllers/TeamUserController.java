@@ -4,8 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.diplom.diplom.dto.TeamEventDTO;
-import ru.diplom.diplom.dto.UserEventShortDTO;
+import ru.diplom.diplom.dto.*;
 import ru.diplom.diplom.models.Team;
 import ru.diplom.diplom.services.TeamUserService;
 
@@ -110,5 +109,66 @@ public class TeamUserController {
     }
 
 
+    @PostMapping("/createTeamForOne/{eventId}/creator/{userId}")
+    public ResponseEntity<TeamEventDTO> createTeamForOne(
+            @PathVariable Integer eventId,
+            @PathVariable Integer userId) {
 
+        TeamEventDTO team = teamUserService.createTeamForOne(eventId, userId);
+        return ResponseEntity.ok(team);
+    }
+    @PostMapping("/createTeam/{eventId}/creator/{userId}")
+    public ResponseEntity<TeamEventDTO> createTeam(
+            @PathVariable Integer eventId,
+            @PathVariable Integer userId, @RequestBody String teamName) {
+
+        TeamEventDTO team = teamUserService.createTeam(eventId, userId, teamName);
+        return ResponseEntity.ok(team);
+    }
+
+    @PutMapping("/joinTeam/{teamId}/user/{userId}")
+    public ResponseEntity<String> joinTeam(
+            @PathVariable Integer teamId,
+            @PathVariable Integer userId) {
+
+        boolean success = teamUserService.joinTeam(teamId, userId);
+        if (success) {
+            return ResponseEntity.ok("Успешно присоединился к команде");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Не удалось присоединиться к команде (возможно, команда полна или не существует)");
+        }
+    }
+
+    @PutMapping("/distributePoints/{eventId}")
+    public ResponseEntity<String> distributePoints(@PathVariable Integer eventId) {
+        try {
+            teamUserService.distributePointsToAllParticipants(eventId);
+            return ResponseEntity.ok("Баллы успешно начислены участникам");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Ошибка при начислении баллов: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/getTeamFromEventAndUserId")
+    public TeamDTO getTeammatesFromEventAndUserId(@RequestParam Integer userId, @RequestParam Integer eventId){
+        return teamUserService.getTeammatesFromEventAndUserId(userId, eventId);
+    }
+
+    @GetMapping("/getTeamForAch")
+    public TeamEventDTO getTeamForAch(@RequestParam Integer userId, @RequestParam Integer eventId){
+        return teamUserService.getTeamForAch(userId, eventId);
+    }
+
+    @PutMapping("/updateTeam")
+    public ResponseEntity<String> updateTeam(@RequestBody TeamUpdateDTO dto) {
+        try {
+            teamUserService.updateTeam(dto);
+            return ResponseEntity.ok("Команда успешно обновлена");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Ошибка при обновлении команды: " + e.getMessage());
+        }
+    }
 }
