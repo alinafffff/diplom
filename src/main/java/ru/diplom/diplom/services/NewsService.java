@@ -389,7 +389,8 @@ public class NewsService {
                 .map(existingNews -> {
                     if (updatedNews.getTitle() != null) existingNews.setContent(updatedNews.getTitle());
                     if (updatedNews.getDescription() != null) existingNews.setContent(updatedNews.getDescription());
-                    if (updatedNews.getPhotoUrl() != null)existingNews.setPhotoUrl(updatedNews.getPhotoUrl());
+                    existingNews.setPhotoUrl(updatedNews.getPhotoUrl());
+                    //if (updatedNews.getPhotoUrl() != null)existingNews.setPhotoUrl(updatedNews.getPhotoUrl());
 
                     return newsRepository.save(existingNews);
                 })

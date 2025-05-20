@@ -185,5 +185,4 @@ public class EventController {
         EventVolunteeringDTO updatedEvent = eventService.updateMobileVolunteeringEvent(eventId, dto);
         return ResponseEntity.ok(updatedEvent);
     }
-
 }

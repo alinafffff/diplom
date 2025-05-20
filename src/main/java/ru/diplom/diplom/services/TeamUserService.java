@@ -1,5 +1,6 @@
 package ru.diplom.diplom.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -409,7 +410,12 @@ public class TeamUserService {
         Integer place = teamRepository.findById(teamId).orElseThrow().getPlace();
         String diploma = teamRepository.findById(teamId).orElseThrow().getDiploma();
         Integer groupId = userRepository.findById(userId).orElseThrow().getGroup();
-        boolean bool = teamRepository.findById(teamId).orElseThrow().getIsConfirmed();
+        //boolean bool = teamRepository.findById(teamId).orElseThrow().getIsConfirmed();
+        Boolean isConfirmed = teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + teamId))
+                .getIsConfirmed();
+
+        boolean bool = isConfirmed != null ? isConfirmed : false;
         return new TeamEventDTO(teamId, teamName,"", place, diploma, eventId, bool);
     }
 

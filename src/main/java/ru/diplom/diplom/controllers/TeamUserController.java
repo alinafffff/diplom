@@ -113,7 +113,7 @@ public class TeamUserController {
     public ResponseEntity<TeamEventDTO> createTeamForOne(
             @PathVariable Integer eventId,
             @PathVariable Integer userId) {
-
+        System.out.println(eventId + " " + userId);
         TeamEventDTO team = teamUserService.createTeamForOne(eventId, userId);
         return ResponseEntity.ok(team);
     }
