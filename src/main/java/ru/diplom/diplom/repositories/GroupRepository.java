@@ -48,7 +48,13 @@ public interface GroupRepository extends JpaRepository<Group,Integer> {
     """, nativeQuery = true)
     List<Group> getAllGroups();
 
-    @Query("select g from Group g join User u on u.group = g.id")
-    Optional<Group> findByMemberId(Integer integer);
+    //@Query("select g from Group g join User u on u.group = g.id")
+    @Query(value = """
+    SELECT mg.* FROM my_group mg 
+    JOIN my_user u ON mg.id = u.my_group_id
+    WHERE u.id = :member
+    LIMIT 1
+    """, nativeQuery = true)
+    Optional<Group> findByMemberId(@Param("member") Integer member);
 
 }

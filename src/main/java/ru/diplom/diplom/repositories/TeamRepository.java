@@ -16,7 +16,9 @@ public interface TeamRepository extends JpaRepository<Team,Integer> {
 
     List<Team> findByMyEvent(Integer eventId);
 
-    @Query("select t.id from TeamUser tu join Team t on tu.team = t.id where tu.user = ?1 and t.myEvent = ?2")
+    @Query(value = "SELECT t.id FROM team_my_user tu JOIN team t ON tu.team_id = t.id " +
+            "WHERE tu.my_user_id = ?1 AND t.my_event_id = ?2 ORDER BY t.id ASC LIMIT 1",
+            nativeQuery = true)
     Optional<Integer> findIdByEventIdAndMemberId(Integer userId, Integer eventId);
 
     @Query("select t.name from Team t where t.id = ?1")

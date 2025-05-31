@@ -267,7 +267,7 @@ public class TeamUserService {
         Team team = new Team();
         team.setName(String.valueOf(userRepository.findById(userId).orElseThrow().getName()));
         team.setMyEvent(eventId);
-        team.setIsConfirmed(true); // или true, если не требуется подтверждение
+        team.setIsConfirmed(null); // или true, если не требуется подтверждение
         team = teamRepository.save(team);
         // Добавление первого участника
         TeamUser teamUser = new TeamUser();
@@ -285,7 +285,7 @@ public class TeamUserService {
         Team team = new Team();
         team.setName(teamName);
         team.setMyEvent(eventId);
-        team.setIsConfirmed(true); // или true, если не требуется подтверждение
+        team.setIsConfirmed(null); // или true, если не требуется подтверждение
         team = teamRepository.save(team);
         // Добавление первого участника
         TeamUser teamUser = new TeamUser();
