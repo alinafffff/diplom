@@ -260,10 +260,13 @@ public class EventService {
                     Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
                     Boolean isRejected = event.getIsRejected();
                     LocalDateTime startDate = event.getStartDate();
+                    LocalDateTime effectiveEndDate = event.getEndDate() != null
+                            ? event.getEndDate()
+                            : startDate.plusDays(1);
 
                     boolean isUpcoming = event.getStartDate().isAfter(now);
                     boolean isOngoing = !event.getStartDate().isAfter(now) &&
-                            (event.getEndDate() == null || !event.getEndDate().isBefore(now));
+                            (!effectiveEndDate.isBefore(now));
 
                     boolean dateCondition = isUpcoming || isOngoing;
                     boolean statusCondition = Boolean.FALSE.equals(isStudentCouncilRequest) ||
@@ -318,10 +321,13 @@ public class EventService {
                     Boolean isStudentCouncilRequest = event.getIsStudentCouncilRequest();
                     Boolean isRejected = event.getIsRejected();
                     LocalDateTime startDate = event.getStartDate();
+                    LocalDateTime effectiveEndDate = event.getEndDate() != null
+                            ? event.getEndDate()
+                            : startDate.plusDays(1);
 
                     boolean isUpcoming = event.getStartDate().isAfter(now);
                     boolean isOngoing = !event.getStartDate().isAfter(now) &&
-                            (event.getEndDate() == null || !event.getEndDate().isBefore(now));
+                            (!effectiveEndDate.isBefore(now));
 
                     boolean dateCondition = isUpcoming || isOngoing;
                     boolean statusCondition = Boolean.FALSE.equals(isStudentCouncilRequest) ||
@@ -626,7 +632,7 @@ public class EventService {
                         .collect(Collectors.toList());
 
             default:
-                return Collections.emptyList(); // или выбросить исключение
+                return Collections.emptyList();
         }
     }
 

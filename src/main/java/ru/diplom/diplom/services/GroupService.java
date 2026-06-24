@@ -170,7 +170,7 @@ public class GroupService {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Группа не найдена"));
 
-        System.out.println("Before update - Description: " + group.getDescription()); // Лог
+        System.out.println("Before update - Description: " + group.getDescription());
 
         if (starosta != null) {
             group.setLeader(starosta);
@@ -182,10 +182,10 @@ public class GroupService {
             group.setDescription(newDescription);
         }
 
-        System.out.println("After update - Description: " + group.getDescription()); // Лог
+        System.out.println("After update - Description: " + group.getDescription());
 
         Group saved = groupRepository.save(group);
-        System.out.println("Saved entity - Description: " + saved.getDescription()); // Лог
+        System.out.println("Saved entity - Description: " + saved.getDescription());
     }
     public Optional<Group> getGroupById(Integer groupId) {
         return groupRepository.findById(groupId);

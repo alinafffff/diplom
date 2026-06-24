@@ -49,7 +49,7 @@ public class UserController {
     @PutMapping("/updateUser/{userId}")
     public ResponseEntity<String> updateUser(
             @PathVariable Integer userId,
-            @RequestBody UserUpdateCreateDTO request) { // Принимаем JSON
+            @RequestBody UserUpdateCreateDTO request) {
         userService.updateUser(userId, request);
         return ResponseEntity.ok("Пользователь успешно обновлен");
     }
@@ -165,7 +165,6 @@ public class UserController {
         user.setEmail(dto.getEmail());
         user.setPhone(dto.getPhone());
         user.setLogin(dto.getLogin());
-//        user.setPassword(passwordEncoder.encode(dto.getPassword())); // обязательно хэш
         user.setPassword(dto.getPassword());
         user.setGroup(dto.getGroupId()); // может быть null
         user.setRole(4); // Роль должна быть в БД

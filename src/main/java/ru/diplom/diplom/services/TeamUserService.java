@@ -350,7 +350,7 @@ public class TeamUserService {
             for (User u : participants) {
                 User user = userRepository.findById(u.getId())
                         .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
-                user.setPoints(user.getPoints() + pointsToGive); // или updateScore(userId, pointsToGive)
+                user.setPoints(user.getPoints() + pointsToGive);
                 userRepository.save(user);
             }
         }
